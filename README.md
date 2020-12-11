@@ -28,6 +28,11 @@ Requires Administrator privileges.
 
 - Mass kicking variants of the functions for mass banning
 
+# Libraries Used
+
+- [Discord.NET](https://github.com/discord-net/Discord.Net)
+- [Garyon](https://github.com/AlFasGD/Garyon)
+
 # Contribution
 
 Contributions are welcome, under the following constraints:
