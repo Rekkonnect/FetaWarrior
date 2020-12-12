@@ -1,8 +1,10 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.Rest;
 using Discord.WebSocket;
 using FetaWarrior.Configuration;
 using FetaWarrior.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -15,13 +17,17 @@ namespace FetaWarrior.DiscordFunctionality
 
         public static IEnumerable<CommandInfo> AllAvailableCommands => GlobalCommandHandler.CommandService.Commands;
 
-        public readonly CommandService CommandService;
-        public readonly DiscordSocketClient Client;
+        public CommandService CommandService { get; init; }
 
-        public CommandHandler(CommandService service, DiscordSocketClient client)
+        // Abstract the clients to a better place
+        public DiscordSocketClient Client { get; init; }
+        public DiscordRestClient RestClient { get; init; }
+
+        public CommandHandler(CommandService service, DiscordSocketClient client, DiscordRestClient restClient)
         {
             CommandService = service;
             Client = client;
+            RestClient = restClient;
             Initialize();
         }
 
@@ -56,6 +62,7 @@ namespace FetaWarrior.DiscordFunctionality
                 return;
 
             var context = new SocketCommandContext(Client, socketMessage);
+
             var prefix = BotConfig.Instance.GetPrefixForGuild(context.Guild.Id);
 
             if (!socketMessage.Content.StartsWith(prefix))
@@ -69,7 +76,7 @@ namespace FetaWarrior.DiscordFunctionality
                 switch (error)
                 {
                     case CommandError.UnknownCommand:
-                        return;
+                        break;
 
                     default:
                         await context.Channel.SendMessageAsync(error switch
@@ -88,6 +95,31 @@ namespace FetaWarrior.DiscordFunctionality
                         });
                         break;
                 }
+
+                if (result is ExecuteResult executionResult)
+                {
+                    Console.WriteLine(executionResult.Exception);
+                    Console.WriteLine();
+                    Console.WriteLine(executionResult.Exception.StackTrace);
+                    Console.WriteLine();
+                    Console.WriteLine(executionResult.Exception.Message);
+                }
+                else if (result is ParseResult parseResult)
+                {
+                    Console.WriteLine("Parameter Values");
+                    if (parseResult.ParamValues != null)
+                        foreach (var value in parseResult.ParamValues)
+                            Console.WriteLine(value);
+
+                    Console.WriteLine();
+                    Console.WriteLine("Argument Values");
+                    if (parseResult.ArgValues != null)
+                        foreach (var value in parseResult.ArgValues)
+                            Console.WriteLine(value);
+
+                    Console.WriteLine();
+                    Console.WriteLine($"Error Parameter: {parseResult.ErrorParameter}");
+                }
             }
         }
         // Future-proofing those functions' existence
@@ -101,12 +133,12 @@ namespace FetaWarrior.DiscordFunctionality
         }
         #endregion
 
-        public static void InitializeSingletonFromClient(DiscordSocketClient client)
+        public static void InitializeSingletonFromClient(DiscordSocketClient client, DiscordRestClient restClient)
         {
             if (GlobalCommandHandler != null)
                 return;
 
-            GlobalCommandHandler = new CommandHandler(new CommandService(), client);
+            GlobalCommandHandler = new CommandHandler(new CommandService(), client, restClient);
         }
     }
 }

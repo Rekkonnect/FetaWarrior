@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.Rest;
 using Discord.WebSocket;
 using FetaWarrior.Configuration;
 using FetaWarrior.DiscordFunctionality;
@@ -12,11 +13,8 @@ namespace FetaWarrior
 {
     public static class Program
     {
-        public static DiscordSocketClient Client
-        {
-            get => CommandHandler.GlobalCommandHandler.Client;
-            private set => CommandHandler.InitializeSingletonFromClient(value);
-        }
+        public static DiscordSocketClient Client => CommandHandler.GlobalCommandHandler.Client;
+        public static DiscordRestClient RestClient => CommandHandler.GlobalCommandHandler.RestClient;
 
         private static string clientID, clientSecret, botToken;
 
@@ -65,10 +63,17 @@ namespace FetaWarrior
 
         private static void Login()
         {
-            Client = new DiscordSocketClient();
+            var client = new DiscordSocketClient();
+            var restClient = new DiscordRestClient();
+
+            CommandHandler.InitializeSingletonFromClient(client, restClient);
+
             PerformAsyncTask(Client.LoginAsync(TokenType.Bot, botToken));
             PerformAsyncTask(Client.StartAsync());
             Client.SetStatusAsync(UserStatus.Online);
+
+            PerformAsyncTask(RestClient.LoginAsync(TokenType.Bot, botToken));
+
             WriteLine("Logged in.");
         }
         private static void Logout()
@@ -76,6 +81,8 @@ namespace FetaWarrior
             PerformAsyncTask(Client.SetStatusAsync(UserStatus.Offline));
             PerformAsyncTask(Client.StopAsync());
             PerformAsyncTask(Client.LogoutAsync());
+
+            PerformAsyncTask(RestClient.LogoutAsync());
         }
 
         private static void PerformAsyncTask(Task task)
