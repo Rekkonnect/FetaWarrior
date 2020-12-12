@@ -9,6 +9,21 @@ namespace FetaWarrior.Extensions
 {
     public static class CommandServiceExtensions
     {
+        private static readonly Type[] baseTypeReaders;
+        
+        static CommandServiceExtensions()
+        {
+            var allTypes = typeof(TypeReader).Assembly.GetTypes();
+            var filtered = allTypes.Where(FilterTypeReaderType);
+            baseTypeReaders = filtered.ToArray();
+
+            bool FilterTypeReaderType(Type t)
+            {
+                return (t.Namespace?.StartsWith(typeof(UserTypeReader<>).Namespace) ?? false)
+                    && t.Name.EndsWith(typeof(UserTypeReader<>).Name[("User".Length)..]);
+            }
+        }
+
         public static void AddTypeReader<TObject, TReader>(this CommandService service)
             where TReader : TypeReader<TObject>, new()
         {
@@ -20,7 +35,8 @@ namespace FetaWarrior.Extensions
             foreach (var t in typeReaders)
             {
                 var typeReaderBaseType = t;
-                while (!typeReaderBaseType.IsGenericType || typeReaderBaseType.GetGenericTypeDefinition() != typeof(TypeReader<>))
+
+                while (!typeReaderBaseType.IsGenericType || !baseTypeReaders.Contains(typeReaderBaseType.GetGenericTypeDefinition()))
                     typeReaderBaseType = typeReaderBaseType.BaseType;
 
                 service.AddTypeReader(typeReaderBaseType.GenericTypeArguments[0], t.GetConstructor(Type.EmptyTypes).Invoke(null) as TypeReader);
