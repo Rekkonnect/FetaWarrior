@@ -10,7 +10,7 @@ namespace FetaWarrior.DiscordFunctionality
     {
         [Command("prefix")]
         [Summary("Displays the current prefix for this bot on this server.")]
-        [RequireContext(ContextType.Guild)]
+        [RequireGuildContext]
         [RequireAdminPermission]
         public async Task DisplayCurrentPrefixAsync()
         {
@@ -19,7 +19,7 @@ namespace FetaWarrior.DiscordFunctionality
 
         [Command("prefix default")]
         [Summary("Resets the prefix for this bot on this server to the default one.")]
-        [RequireContext(ContextType.Guild)]
+        [RequireGuildContext]
         [RequireAdminPermission]
         public async Task ResetPrefixAsync()
         {
@@ -29,7 +29,7 @@ namespace FetaWarrior.DiscordFunctionality
 
         [Command("prefix set")]
         [Summary("Sets the prefix for this bot on this server to the provided one.")]
-        [RequireContext(ContextType.Guild)]
+        [RequireGuildContext]
         [RequireAdminPermission]
         public async Task SetPrefixAsync
         (
