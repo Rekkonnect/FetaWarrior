@@ -23,10 +23,11 @@ Requires Administrator privileges.
   - The command (`=massban jd`) bans all users that joined within a specified timeframe, which is determined by specified users. The start of the timeframe (the least recent) is determined by the join date (and time) of the first user that was provided in the arguments, and the end of the timeframe (the most recent) is determined by the join date of the last user that was provided in the arguments. Note that first and last do not imply a list of users. Only providing 2 user IDs.
   - Example: `=massban jd 786063455639044097 786078457812484126`
     - This will ban all users that joined within the join date of the users 786063455639044097, and 786078457812484126, **including** the users with the provided IDs.
+- Respective commands for kicking members instead of banning (`masskick` instead of `massban`).
   
 ## Planned Functionality
 
-- Mass kicking variants of the functions for mass banning
+- Nothing at the moment.
 
 # Libraries Used
 
