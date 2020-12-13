@@ -26,12 +26,12 @@ namespace FetaWarrior.Configuration
 
         private FlexibleDictionary<ulong, string> prefixes = new();
 
-        public string GetPrefixForGuild(IGuild guild) => GetPrefixForGuild(guild.Id);
-        public string GetPrefixForGuild(ulong guildID)
+        public string GetPrefixForGuild(IGuild guild) => GetPrefixForGuild(guild?.Id);
+        public string GetPrefixForGuild(ulong? guildID)
         {
             // No need to save the information here because the default prefix is implied in every usage
             // Besides, if the default prefix changes, servers that are using the default prefix have to keep up
-            return prefixes[guildID] ?? DefaultPrefix;
+            return prefixes[guildID ?? default] ?? DefaultPrefix;
         }
         public void SetPrefixForGuild(IGuild guild, string prefix) => SetPrefixForGuild(guild.Id, prefix);
         public void SetPrefixForGuild(ulong guildID, string prefix)
