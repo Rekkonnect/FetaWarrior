@@ -56,14 +56,16 @@ namespace FetaWarrior.DiscordFunctionality
         #region Handlers
         private async Task HandleCommandAsync(SocketMessage message)
         {
+            var receivedTime = DateTime.Now;
+
             var socketMessage = message as SocketUserMessage;
 
             if (!socketMessage?.Author.IsHuman() ?? true)
                 return;
 
-            var context = new SocketCommandContext(Client, socketMessage);
+            var context = new TimestampedSocketCommandContext(Client, socketMessage, receivedTime);
 
-            var prefix = BotConfig.Instance.GetPrefixForGuild(context.Guild.Id);
+            var prefix = BotConfig.Instance.GetPrefixForGuild(context.Guild);
 
             if (!socketMessage.Content.StartsWith(prefix))
                 return;
