@@ -16,7 +16,10 @@ namespace FetaWarrior
         public static DiscordSocketClient Client => CommandHandler.GlobalCommandHandler.Client;
         public static DiscordRestClient RestClient => CommandHandler.GlobalCommandHandler.RestClient;
 
-        private static string clientID, clientSecret, botToken;
+        // TODO: Move to another class, along with the clients
+        public static ulong ClientID { get; private set; }
+        public static string ClientSecret { get; private set; }
+        public static string BotToken { get; private set; }
 
         public static void Main(string[] args)
         {
@@ -33,9 +36,9 @@ namespace FetaWarrior
         private static void GetSecretLoginStuff()
         {
             string[] lines = ReadAllLines("secrets.txt");
-            clientID = lines[0];
-            clientSecret = lines[1];
-            botToken = lines[2];
+            ClientID = ulong.Parse(lines[0]);
+            ClientSecret = lines[1];
+            BotToken = lines[2];
         }
 
         private static void SetStatus()
@@ -68,11 +71,11 @@ namespace FetaWarrior
 
             CommandHandler.InitializeSingletonFromClient(client, restClient);
 
-            PerformAsyncTask(Client.LoginAsync(TokenType.Bot, botToken));
+            PerformAsyncTask(Client.LoginAsync(TokenType.Bot, BotToken));
             PerformAsyncTask(Client.StartAsync());
             Client.SetStatusAsync(UserStatus.Online);
 
-            PerformAsyncTask(RestClient.LoginAsync(TokenType.Bot, botToken));
+            PerformAsyncTask(RestClient.LoginAsync(TokenType.Bot, BotToken));
 
             WriteLine("Logged in.");
         }

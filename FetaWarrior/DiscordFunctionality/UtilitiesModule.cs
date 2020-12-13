@@ -1,14 +1,15 @@
 ﻿using Discord;
 using Discord.Commands;
 using Garyon.Extensions;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality
 {
-    /// <summary>Represents the help command's module.</summary>
-    public class HelpModule : ModuleBase<SocketCommandContext>
+    public class UtilitiesModule : ModuleBase<TimestampedSocketCommandContext>
     {
+        #region Help
         [Command("help")]
         [Summary("Displays a help message containing a list of all the available commands.")]
         public async Task HelpAsync()
@@ -103,5 +104,38 @@ namespace FetaWarrior.DiscordFunctionality
         {
             return parameter.Summary ?? "No description available.";
         }
+        #endregion
+
+        #region Invite
+        [Command("invite")]
+        [Summary("Gets the invite link for this bot.")]
+        public async Task InviteAsync()
+        {
+            await ReplyAsync(InviteUtilities.GenerateBotInviteLinkAdminPermissions(Program.ClientID));
+        }
+        // TODO: Add `invite <botClientID> <permissions>` command
+        #endregion
+
+        #region Ping
+        [Command("ping")]
+        [Summary("Gets the current ping.")]
+        public async Task PingAsync()
+        {
+            var beforeSending = DateTime.Now;
+
+            var message = await ReplyAsync("Calculating ping...");
+
+            var afterSending = DateTime.Now;
+            var sendingLatency = afterSending - beforeSending;
+
+            var totalPing = sendingLatency + Context.RetrievalLatency;
+            await message.ModifyAsync(m => m.Content =
+$@"Current Ping: `{totalPing.TotalMilliseconds:N0}ms`
+
+Details:
+Retrieval Latency: `{Context.RetrievalLatency.TotalMilliseconds:N0}ms`
+Sending Latency: `{sendingLatency.TotalMilliseconds:N0}ms`");
+        }
+        #endregion
     }
 }
