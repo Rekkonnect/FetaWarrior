@@ -116,7 +116,33 @@ namespace FetaWarrior.DiscordFunctionality
         {
             await ReplyAsync(InviteUtilities.GenerateBotInviteLinkAdminPermissions(Program.ClientID));
         }
-        // TODO: Add `invite <botClientID> <permissions>` command
+        [Command("invite")]
+        [Summary("Gets the invite link for a bot, requesting admin permissions.")]
+        [Alias("inv")]
+        public async Task InviteAsync
+        (
+            [Summary("The ID of the bot whose invite to request.")]
+            [Name("botID")]
+            ulong botID
+        )
+        {
+            await ReplyAsync(InviteUtilities.GenerateBotInviteLinkAdminPermissions(botID));
+        }
+        [Command("invite")]
+        [Summary("Gets the invite link for a bot, requesting the specified permissions.")]
+        [Alias("inv")]
+        public async Task InviteAsync
+        (
+            [Summary("The ID of the bot whose invite to request.")]
+            [Name("botID")]
+            ulong botID,
+            [Summary("The permissions integer for the bot. Refer to the Discord API for how to get this number.")]
+            [Name("permissions")]
+            ulong permissions
+        )
+        {
+            await ReplyAsync(InviteUtilities.GenerateBotInviteLink(botID, permissions));
+        }
         #endregion
 
         #region Ping
