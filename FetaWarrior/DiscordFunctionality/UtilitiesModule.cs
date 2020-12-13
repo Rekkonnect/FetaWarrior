@@ -12,6 +12,7 @@ namespace FetaWarrior.DiscordFunctionality
         #region Help
         [Command("help")]
         [Summary("Displays a help message containing a list of all the available commands.")]
+        [Alias("h")]
         public async Task HelpAsync()
         {
             EmbedBuilder embedBuilder = new EmbedBuilder
@@ -31,6 +32,7 @@ namespace FetaWarrior.DiscordFunctionality
 
         [Command("help")]
         [Summary("Displays a message providing details about the requested command.")]
+        [Alias("h")]
         public async Task HelpAsync
         (
             // I'm really not too sure about that kinda syntax
@@ -109,6 +111,7 @@ namespace FetaWarrior.DiscordFunctionality
         #region Invite
         [Command("invite")]
         [Summary("Gets the invite link for this bot.")]
+        [Alias("inv")]
         public async Task InviteAsync()
         {
             await ReplyAsync(InviteUtilities.GenerateBotInviteLinkAdminPermissions(Program.ClientID));
