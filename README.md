@@ -2,13 +2,15 @@
 
 This bot started as a quick solution for mass banning the thousands of accounts that raided a server that I'm an admin in. It was then considered to be released for the public since no other bot was found to provide that kind of functionality.
 
-# [Invite Link](https://discord.com/api/oauth2/authorize?client_id=786220671331074109&permissions=10246&scope=bot)
+# [Invite Link](https://discord.com/api/oauth2/authorize?client_id=786220671331074109&permissions=76806&scope=bot)
 
 Permissions required:
 - Kick Members
 - Ban Members
+- View Channels
 - Send Messages
 - Manage Messages
+- Read Message History
 
 # Usage
 ## General Information
