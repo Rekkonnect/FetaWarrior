@@ -16,6 +16,13 @@ namespace FetaWarrior
         public static DiscordSocketClient Client => CommandHandler.GlobalCommandHandler.Client;
         public static DiscordRestClient RestClient => CommandHandler.GlobalCommandHandler.RestClient;
 
+        public const GuildPermission MinimumBotPermissions = GuildPermission.KickMembers
+                                                           | GuildPermission.BanMembers
+                                                           | GuildPermission.ViewChannel
+                                                           | GuildPermission.SendMessages
+                                                           | GuildPermission.ManageMessages
+                                                           | GuildPermission.ReadMessageHistory;
+
         // TODO: Move to another class, along with the clients
         public static ulong ClientID { get; private set; }
         public static string ClientSecret { get; private set; }

@@ -126,7 +126,7 @@ namespace FetaWarrior.DiscordFunctionality
             ulong botID
         )
         {
-            await ReplyAsync(InviteUtilities.GenerateBotInviteLinkAdminPermissions(botID));
+            await ReplyAsync(InviteUtilities.GenerateBotInviteLink(botID, (ulong)Program.MinimumBotPermissions));
         }
         [Command("invite")]
         [Summary("Gets the invite link for a bot, requesting the specified permissions.")]
