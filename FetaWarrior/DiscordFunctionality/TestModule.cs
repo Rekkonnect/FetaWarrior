@@ -14,7 +14,7 @@ namespace FetaWarrior.DiscordFunctionality
         [Command("testadmin")]
 #endif
         [RequireGuildContext]
-        [RequireAdminPermission]
+        [RequireUserAdminPermission]
         public async Task TestAdminAsync()
         {
             var permissions = Context.Guild.GetUser(Context.Message.Author.Id).GuildPermissions;
