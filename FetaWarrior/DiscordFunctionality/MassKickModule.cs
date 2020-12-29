@@ -81,7 +81,7 @@ namespace FetaWarrior.DiscordFunctionality
 
         protected override async Task YeetUser(ulong userID, string reason)
         {
-            var guild = await Program.RestClient.GetGuildAsync(Context.Guild.Id);
+            var guild = await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
             var user = await guild.GetUserAsync(userID);
             await user.KickAsync(reason);
         }

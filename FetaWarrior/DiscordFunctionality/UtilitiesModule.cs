@@ -114,7 +114,7 @@ namespace FetaWarrior.DiscordFunctionality
         [Alias("inv")]
         public async Task InviteAsync()
         {
-            await ReplyAsync(InviteUtilities.GenerateBotInviteLinkAdminPermissions(Program.ClientID));
+            await ReplyAsync(InviteUtilities.GenerateBotInviteLinkAdminPermissions(BotCredentials.Instance.ClientID));
         }
         [Command("invite")]
         [Summary("Gets the invite link for a bot, requesting admin permissions.")]
@@ -126,7 +126,7 @@ namespace FetaWarrior.DiscordFunctionality
             ulong botID
         )
         {
-            await ReplyAsync(InviteUtilities.GenerateBotInviteLink(botID, (ulong)Program.MinimumBotPermissions));
+            await ReplyAsync(InviteUtilities.GenerateBotInviteLink(botID, (ulong)BotClientManager.MinimumBotPermissions));
         }
         [Command("invite")]
         [Summary("Gets the invite link for a bot, requesting the specified permissions.")]

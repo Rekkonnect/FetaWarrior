@@ -24,7 +24,7 @@ namespace FetaWarrior.DiscordFunctionality
             var guild = Context.Guild;
             var channel = guild.SystemChannel;
 
-            var toBan = new HashSet<ulong>();
+            var toYeet = new HashSet<ulong>();
 
             var progressMessage = await Context.Channel.SendMessageAsync($"Discovering users to {YeetAction}... 0 users have been found so far.");
 
@@ -33,7 +33,6 @@ namespace FetaWarrior.DiscordFunctionality
             {
                 var messages = await channel.GetMessagesAsync(currentID, Direction.After, 100).FlattenAsync();
 
-                // Reduce the awaitage to the flattened
                 foreach (var message in messages)
                 {
                     var id = message.Id;
@@ -51,13 +50,13 @@ namespace FetaWarrior.DiscordFunctionality
                     if (s.Type != MessageType.GuildMemberJoin)
                         continue;
 
-                    toBan.Add(s.Author.Id);
+                    toYeet.Add(s.Author.Id);
                 }
 
-                await progressMessage.ModifyAsync(m => m.Content = $"Discovering users to ban... {toBan.Count} users have been found so far.");
+                await progressMessage.ModifyAsync(m => m.Content = $"Discovering users to {YeetAction}... {toYeet.Count} users have been found so far.");
             }
 
-            await MassYeetWithProgress(toBan, progressMessage);
+            await MassYeetWithProgress(toYeet, progressMessage);
         }
         #endregion
         #region Join Date
@@ -77,7 +76,7 @@ namespace FetaWarrior.DiscordFunctionality
         }
         public async Task MassYeetFromJoinDate(ulong firstUserID, ulong lastUserID)
         {
-            var restGuild = await Program.RestClient.GetGuildAsync(Context.Guild.Id);
+            var restGuild = await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
 
             var progressMessage = await Context.Channel.SendMessageAsync("Retrieving guild member list...");
 

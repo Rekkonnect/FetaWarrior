@@ -18,7 +18,7 @@ namespace FetaWarrior.DiscordFunctionality.TypeReaders
             if (!MentionUtils.TryParseUser(input, out ulong id))
                 return await base.ReadAsync(context, input, services);
 
-            var user = await Program.RestClient.GetGuildUserAsync(context.Guild.Id, id);
+            var user = await BotClientManager.Instance.RestClient.GetGuildUserAsync(context.Guild.Id, id);
 
             if (user == null)
                 return TypeReaderResult.FromError(CommandError.Unsuccessful, "The user could not be loaded.");

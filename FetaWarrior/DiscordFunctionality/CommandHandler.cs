@@ -17,33 +17,27 @@ namespace FetaWarrior.DiscordFunctionality
 
         public static IEnumerable<CommandInfo> AllAvailableCommands => GlobalCommandHandler.CommandService.Commands;
 
+        public static DiscordSocketClient Client => BotClientManager.Instance.Client;
+        public static DiscordRestClient RestClient => BotClientManager.Instance.RestClient;
+
+        static CommandHandler()
+        {
+            // Nyun-nyun
+            GlobalCommandHandler = new(new());
+        }
+
         public CommandService CommandService { get; init; }
 
-        // Abstract the clients to a better place
-        public DiscordSocketClient Client { get; init; }
-        public DiscordRestClient RestClient { get; init; }
-
-        public CommandHandler(CommandService service, DiscordSocketClient client, DiscordRestClient restClient)
+        public CommandHandler(CommandService service)
         {
             CommandService = service;
-            Client = client;
-            RestClient = restClient;
             Initialize();
         }
 
         #region Initialization
         private void Initialize()
         {
-            AddEvents();
             Task.WaitAll(Task.Run(InitializeCommandHandling));
-        }
-        private void AddEvents()
-        {
-            Client.MessageReceived += HandleCommandAsync;
-
-            // For the time being no commands care about reactions, better not overload the bot
-            //Client.ReactionAdded += HandleReactionAddedAsync;
-            //Client.ReactionRemoved += HandleReactionRemovedAsync;
         }
         private async Task InitializeCommandHandling()
         {
@@ -52,6 +46,15 @@ namespace FetaWarrior.DiscordFunctionality
             await CommandService.AddModulesAsync(thisAssembly, null);
         }
         #endregion
+
+        public void AddEvents(DiscordSocketClient client)
+        {
+            client.MessageReceived += HandleCommandAsync;
+
+            // For the time being no commands care about reactions, better not overload the bot
+            //Client.ReactionAdded += HandleReactionAddedAsync;
+            //Client.ReactionRemoved += HandleReactionRemovedAsync;
+        }
 
         #region Handlers
         private async Task HandleCommandAsync(SocketMessage message)
@@ -134,13 +137,5 @@ namespace FetaWarrior.DiscordFunctionality
             // Handle reactions on already active commands
         }
         #endregion
-
-        public static void InitializeSingletonFromClient(DiscordSocketClient client, DiscordRestClient restClient)
-        {
-            if (GlobalCommandHandler != null)
-                return;
-
-            GlobalCommandHandler = new CommandHandler(new CommandService(), client, restClient);
-        }
     }
 }
