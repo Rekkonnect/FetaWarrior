@@ -30,10 +30,17 @@ Permissions required:
   - Example: `=massban jd 786063455639044097 786078457812484126`
     - This will ban all users that joined within the join date of the users 786063455639044097, and 786078457812484126, **including** the users with the provided IDs.
 - Respective commands for kicking members instead of banning (`masskick` instead of `massban`).
+- **Delete messages within a specified range**
+  - The command (`=delete`) deletes all messages that were sent after a specified message and before another specified message, or until the message that includes the command. It uses the bulk message deletion endpoint for server messages, and as a result might not be logged on certain logging bots.
+  - Example: `=delete 793246033324146689 793246975277137940`
+    - This will delete all messages that were sent after the message with ID 793246033324146689 was sent, and before the message with ID 793246975277137940 was sent, **including** the messages with the provided IDs.
+  - Another example: `=delete 793246033324146689`
+    - This will delete all messages that were sent after the message with ID 793246033324146689 was sent, and before the message that triggers the command was sent, **including** the first message with the provided ID, but **excluding** the command message.
   
 ## Planned Functionality
 
-- Mass delete messages
+- Mass delete messages by user
+- Mass delete messages in channels
 
 # Libraries Used
 
