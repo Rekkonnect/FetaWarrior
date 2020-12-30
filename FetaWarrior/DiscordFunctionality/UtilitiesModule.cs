@@ -153,17 +153,22 @@ namespace FetaWarrior.DiscordFunctionality
             var beforeSending = DateTime.Now;
 
             var message = await ReplyAsync("Calculating ping...");
+            var discordTimestamp = message.Timestamp;
 
             var afterSending = DateTime.Now;
             var sendingLatency = afterSending - beforeSending;
+            var discordClockOffset = discordTimestamp - afterSending;
 
-            var totalPing = sendingLatency + Context.RetrievalLatency;
+            var offsetRetrievalLatency = Context.GetRetrievalLatency(discordClockOffset);
+            var totalPing = sendingLatency;
+
             await message.ModifyAsync(m => m.Content =
 $@"Current Ping: `{totalPing.TotalMilliseconds:N0}ms`
 
 Details:
-Retrieval Latency: `{Context.RetrievalLatency.TotalMilliseconds:N0}ms`
-Sending Latency: `{sendingLatency.TotalMilliseconds:N0}ms`");
+Retrieval Latency: `{offsetRetrievalLatency.TotalMilliseconds:N0}ms`
+Sending Latency: `{sendingLatency.TotalMilliseconds:N0}ms`
+Discord Clock Offset: `{discordClockOffset.TotalMilliseconds:N0}ms`");
         }
         #endregion
     }
