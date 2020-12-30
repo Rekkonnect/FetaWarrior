@@ -27,18 +27,15 @@ namespace FetaWarrior.DiscordFunctionality
         public DiscordSocketClient Client { get; private set; }
         public DiscordRestClient RestClient { get; private set; }
 
+        private BotClientManager()
+        {
+            StartActivityLoop();
+        }
+
         private void InitializeNewClients()
         {
             InitializeNewSocketClient();
             InitializeNewRestClient();
-        }
-        private void InitializeNewRestClient()
-        {
-            RestClient?.Dispose();
-            RestClient = new();
-
-            // Handles disconnection issues
-            RestClient.LoggedOut += HandleRestClientDisconnection;
         }
         private void InitializeNewSocketClient()
         {
@@ -48,26 +45,56 @@ namespace FetaWarrior.DiscordFunctionality
             // Class coupling go brrr
             CommandHandler.GlobalCommandHandler.AddEvents(Client);
 
-            // Initiates the status loop
-            SetStatus();
+            Client.Disconnected += ReinitializeSocketClientAfterDisconnection;
+            Client.LoggedOut += ReinitializeSocketClientAfterDisconnection;
 
-            // Handles disconnection issues
-            Client.Disconnected += HandleSocketClientDisconnection;
-            Client.LoggedOut += HandleSocketClientDisconnection;
+            Client.LoggedIn += AddSocketClientDisconnectionLoggers;
+        }
+        private void InitializeNewRestClient()
+        {
+            RestClient?.Dispose();
+            RestClient = new();
+
+            RestClient.LoggedOut += ReinitializeRestClientAfterDisconnection;
+
+            RestClient.LoggedIn += AddRestClientDisconnectionLoggers;
+        }
+
+        private async Task AddSocketClientDisconnectionLoggers()
+        {
+            // Events
+            Client.Disconnected -= ReinitializeSocketClientAfterDisconnection;
+            Client.LoggedOut -= ReinitializeSocketClientAfterDisconnection;
+
+            Client.Disconnected += LogSocketClientDisconnection;
+            Client.LoggedOut += LogSocketClientDisconnection;
+
+            Client.Disconnected += ReinitializeSocketClientAfterDisconnection;
+            Client.LoggedOut += ReinitializeSocketClientAfterDisconnection;
+        }
+        private async Task AddRestClientDisconnectionLoggers()
+        {
+            // in C#
+            RestClient.LoggedOut -= ReinitializeRestClientAfterDisconnection;
+
+            RestClient.LoggedOut += LogRestClientDisconnection;
+
+            RestClient.LoggedOut += ReinitializeRestClientAfterDisconnection;
         }
 
         public async Task InitializeLogin()
         {
             Task.WaitAll(LoginSocketClient(), LoginRestClient());
-
-            WriteCurrentTime();
-            WriteLine("Logged in.");
         }
         public async Task Logout()
         {
-            Client.Disconnected -= HandleSocketClientDisconnection;
-            Client.LoggedOut -= HandleSocketClientDisconnection;
-            RestClient.LoggedOut -= HandleRestClientDisconnection;
+            // are a fucking joke
+            Client.Disconnected -= ReinitializeSocketClientAfterDisconnection;
+            Client.Disconnected -= LogSocketClientDisconnection;
+            Client.LoggedOut -= ReinitializeSocketClientAfterDisconnection;
+            Client.LoggedOut -= LogSocketClientDisconnection;
+            RestClient.LoggedOut -= ReinitializeRestClientAfterDisconnection;
+            RestClient.LoggedOut -= LogRestClientDisconnection;
 
             Task.WaitAll(LogoutSocketClient(), LogoutRestClient());
         }
@@ -77,46 +104,70 @@ namespace FetaWarrior.DiscordFunctionality
             InitializeNewSocketClient();
             await Client.LoginAsync(TokenType.Bot, BotCredentials.Instance.BotToken);
             await Client.StartAsync();
-            await Client.SetStatusAsync(UserStatus.Online);
+
+            WriteCurrentTime();
+            WriteLine("Socket client logged in");
         }
         private async Task LoginRestClient()
         {
             InitializeNewRestClient();
             await RestClient.LoginAsync(TokenType.Bot, BotCredentials.Instance.BotToken);
+
+            WriteCurrentTime();
+            WriteLine("REST client logged in");
         }
 
         private async Task LogoutSocketClient()
         {
-            await Client.SetStatusAsync(UserStatus.Offline);
             await Client.StopAsync();
             await Client.LogoutAsync();
+
+            WriteCurrentTime();
+            WriteLine("Socket client logged out");
         }
         private async Task LogoutRestClient()
         {
             await RestClient.LogoutAsync();
+
+            WriteCurrentTime();
+            WriteLine("REST client logged out");
         }
 
-        private async Task HandleSocketClientDisconnection(Exception e)
+        #region Client Reinitializers
+        private async Task ReinitializeSocketClientAfterDisconnection(Exception e)
+        {
+            await LoginSocketClient();
+        }
+        private async Task ReinitializeSocketClientAfterDisconnection()
+        {
+            await LoginSocketClient();
+        }
+        private async Task ReinitializeRestClientAfterDisconnection()
+        {
+            await LoginRestClient();
+        }
+        #endregion
+
+        #region Disconnection Loggers
+        private async Task LogSocketClientDisconnection(Exception e)
         {
             WriteCurrentTime();
             WriteLine("Socket client disconnected");
             WriteException(e);
-            await LoginSocketClient();
         }
-        private async Task HandleSocketClientDisconnection()
+        private async Task LogSocketClientDisconnection()
         {
             WriteCurrentTime();
             WriteLine("Socket client disconnected");
-            await LoginSocketClient();
         }
-        private async Task HandleRestClientDisconnection()
+        private async Task LogRestClientDisconnection()
         {
             WriteCurrentTime();
             WriteLine("REST client disconnected");
-            await LoginRestClient();
         }
+        #endregion
 
-        private void SetStatus()
+        private void StartActivityLoop()
         {
             var lines = new string[]
             {
@@ -125,16 +176,19 @@ namespace FetaWarrior.DiscordFunctionality
                 $"Servers: {{ServerCount}}",
             };
 
-            SetActivityLoop();
+            RunActivityLoop();
 
-            async Task SetActivityLoop()
+            async Task RunActivityLoop()
             {
                 int index = 0;
 
                 while (true)
                 {
-                    var line = lines[index].Replace($"{{ServerCount}}", $"{Client.Guilds.Count}");
-                    await Client.SetActivityAsync(new Game(line, ActivityType.Playing, details: line));
+                    if (Client?.ConnectionState == ConnectionState.Connected)
+                    {
+                        var line = lines[index].Replace($"{{ServerCount}}", $"{Client.Guilds.Count}");
+                        await Client.SetActivityAsync(new Game(line, ActivityType.Playing, details: line));
+                    }
                     await Task.Delay(5000);
                     index = (index + 1) % lines.Length;
                 }
@@ -143,7 +197,7 @@ namespace FetaWarrior.DiscordFunctionality
 
         private static void WriteCurrentTime()
         {
-            Write($"[{DateTime.Now.TimeOfDay}] ");
+            Write($"[{DateTime.Now:dd/MM/yyyy HH:mm:ss.ffff}] ");
         }
         private static void WriteException(Exception e)
         {
