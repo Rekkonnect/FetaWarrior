@@ -18,6 +18,7 @@ namespace FetaWarrior.DiscordFunctionality
         [Alias("sm", "server messages", "servermessage", "servermessages")]
         [RequireGuildContext]
         [RequireUserPermission(GuildPermission.BanMembers)]
+        [RequireBotPermission(GuildPermission.BanMembers)]
         public async Task MassBanFromServerMessages
         (
             [Name("firstMessageID")]
@@ -32,6 +33,7 @@ namespace FetaWarrior.DiscordFunctionality
         [Alias("sm", "server messages", "servermessage", "servermessages")]
         [RequireGuildContext]
         [RequireUserPermission(GuildPermission.BanMembers)]
+        [RequireBotPermission(GuildPermission.BanMembers)]
         public async Task MassBanFromServerMessages
         (
             [Name("firstMessageID")]
@@ -51,6 +53,7 @@ namespace FetaWarrior.DiscordFunctionality
         [Alias("jd", "joindate")]
         [RequireGuildContext]
         [RequireUserPermission(GuildPermission.BanMembers)]
+        [RequireBotPermission(GuildPermission.BanMembers)]
         public async Task MassBanFromJoinDate
         (
             [Name("firstUserID")]
@@ -64,7 +67,8 @@ namespace FetaWarrior.DiscordFunctionality
         [Summary("Mass bans all users that joined within the range specified by two users' join dates. This means that all users that joined after the first specified user, and before the last specified user, **including** the users that were specified as first and last, will be **banned**.")]
         [Alias("jd", "joindate")]
         [RequireGuildContext]
-        [RequireUserAdminPermission]
+        [RequireUserPermission(GuildPermission.BanMembers)]
+        [RequireBotPermission(GuildPermission.BanMembers)]
         public async Task MassBanFromJoinDate
         (
             [Name("firstUserID")]

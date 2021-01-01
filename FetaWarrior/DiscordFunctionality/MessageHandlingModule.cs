@@ -12,6 +12,7 @@ namespace FetaWarrior.DiscordFunctionality
         [Alias("remove", "clear")]
         [Summary("Deletes all messages after the provided message, **including** the first message. Only deletes messages in that same channel.")]
         [RequireUserPermission(ChannelPermission.ManageMessages)]
+        [RequireBotPermission(ChannelPermission.ManageMessages)]
         public async Task DeleteMessages
         (
             [Summary("The ID of the first message that will be deleted, **inclusive**.")]
@@ -25,6 +26,7 @@ namespace FetaWarrior.DiscordFunctionality
         [Alias("remove", "clear")]
         [Summary("Deletes all messages within the provided message range, **including** the first and the last messages. Only deletes messages in that same channel.")]
         [RequireUserPermission(ChannelPermission.ManageMessages)]
+        [RequireBotPermission(ChannelPermission.ManageMessages)]
         public async Task DeleteMessages
         (
             [Summary("The ID of the first message that will be deleted, **inclusive**.")]

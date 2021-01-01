@@ -18,6 +18,7 @@ namespace FetaWarrior.DiscordFunctionality
         [Alias("sm", "server messages", "servermessage", "servermessages")]
         [RequireGuildContext]
         [RequireUserPermission(GuildPermission.KickMembers)]
+        [RequireBotPermission(GuildPermission.KickMembers)]
         public async Task MassKickFromServerMessages
         (
             [Name("firstMessageID")]
@@ -32,6 +33,7 @@ namespace FetaWarrior.DiscordFunctionality
         [Alias("sm", "server messages", "servermessage", "servermessages")]
         [RequireGuildContext]
         [RequireUserPermission(GuildPermission.KickMembers)]
+        [RequireBotPermission(GuildPermission.KickMembers)]
         public async Task MassKickFromServerMessages
         (
             [Name("firstMessageID")]
@@ -51,6 +53,7 @@ namespace FetaWarrior.DiscordFunctionality
         [Alias("jd", "joindate")]
         [RequireGuildContext]
         [RequireUserPermission(GuildPermission.KickMembers)]
+        [RequireBotPermission(GuildPermission.KickMembers)]
         public async Task MassKickFromJoinDate
         (
             [Name("firstUserID")]
@@ -65,6 +68,7 @@ namespace FetaWarrior.DiscordFunctionality
         [Alias("jd", "joindate")]
         [RequireGuildContext]
         [RequireUserPermission(GuildPermission.KickMembers)]
+        [RequireBotPermission(GuildPermission.KickMembers)]
         public async Task MassKickFromJoinDate
         (
             [Name("firstUserID")]
