@@ -1,4 +1,5 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using FetaWarrior.Configuration;
 using FetaWarrior.DiscordFunctionality.Attributes;
 using FetaWarrior.Extensions;
@@ -11,7 +12,6 @@ namespace FetaWarrior.DiscordFunctionality
         [Command("prefix")]
         [Summary("Displays the current prefix for this bot on this server.")]
         [RequireGuildContext]
-        [RequireUserAdminPermission]
         public async Task DisplayCurrentPrefixAsync()
         {
             await Context.Channel.SendMessageAsync($"The current prefix for this server is {BotConfig.Instance.GetPrefixForGuild(Context.Guild).ToNonFormattableText()}");
@@ -20,7 +20,7 @@ namespace FetaWarrior.DiscordFunctionality
         [Command("prefix default")]
         [Summary("Resets the prefix for this bot on this server to the default one.")]
         [RequireGuildContext]
-        [RequireUserAdminPermission]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
         public async Task ResetPrefixAsync()
         {
             BotConfig.Instance.ResetPrefixForGuild(Context.Guild);
@@ -30,7 +30,7 @@ namespace FetaWarrior.DiscordFunctionality
         [Command("prefix set")]
         [Summary("Sets the prefix for this bot on this server to the provided one.")]
         [RequireGuildContext]
-        [RequireUserAdminPermission]
+        [RequireUserPermission(GuildPermission.ManageGuild)]
         public async Task SetPrefixAsync
         (
             [Name("newPrefix")]
