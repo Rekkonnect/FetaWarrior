@@ -1,8 +1,10 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.Net;
 using Discord.Rest;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality
@@ -98,13 +100,30 @@ namespace FetaWarrior.DiscordFunctionality
         private async Task MassYeetWithProgress(ICollection<ulong> toYeet, RestUserMessage progressMessage)
         {
             int yeetedUserCount = 0;
+            int forbiddenOperationCount = 0;
             bool yeetingComplete = false;
             var progressUpdatingTask = UpdateYeetingProgress();
 
             foreach (ulong userID in toYeet)
             {
-                // Awaiting because unknown issues that could be caused wihout awaiting
-                await YeetUser(userID, $"Mass {YeetActionPastParticiple}");
+                bool success = false;
+                while (!success)
+                {
+                    success = true;
+                    try
+                    {
+                        await YeetUser(userID, $"Mass {YeetActionPastParticiple}");
+                    }
+                    catch (HttpException e) when (e.HttpCode == HttpStatusCode.Forbidden)
+                    {
+                        forbiddenOperationCount++;
+                    }
+                    catch
+                    {
+                        // In case of any other error, attempt to retry
+                        success = false;
+                    }
+                }
                 yeetedUserCount++;
             }
 
@@ -118,7 +137,12 @@ namespace FetaWarrior.DiscordFunctionality
                     await progressMessage.ModifyAsync(m => m.Content = $"{toYeet.Count} users are being {YeetActionPastParticiple}... {yeetedUserCount} users have been {YeetActionPastParticiple} so far.");
                     await Task.Delay(1000);
                 }
-                await progressMessage.ModifyAsync(m => m.Content = $"{toYeet.Count} users have been {YeetActionPastParticiple}.");
+
+                var finalizedMessage = $"{toYeet.Count} users have been {YeetActionPastParticiple}.";
+                if (forbiddenOperationCount > 0)
+                    finalizedMessage += $"\n{forbiddenOperationCount} users could not be {YeetActionPastParticiple}.";
+
+                await progressMessage.ModifyAsync(m => m.Content = finalizedMessage);
             }
         }
     }
