@@ -33,7 +33,6 @@ namespace FetaWarrior.DiscordFunctionality
         [RequireUserPermission(GuildPermission.ManageGuild)]
         public async Task SetPrefixAsync
         (
-            [Name("newPrefix")]
             [Summary("The new prefix to set.")]
             string newPrefix
         )

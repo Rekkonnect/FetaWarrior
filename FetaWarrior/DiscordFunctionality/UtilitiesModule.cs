@@ -1,7 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
 using Garyon.Extensions;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,8 +10,8 @@ namespace FetaWarrior.DiscordFunctionality
     {
         #region Help
         [Command("help")]
-        [Summary("Displays a help message containing a list of all the available commands.")]
         [Alias("h")]
+        [Summary("Displays a help message containing a list of all the available commands.")]
         public async Task HelpAsync()
         {
             EmbedBuilder embedBuilder = new EmbedBuilder
@@ -31,13 +30,11 @@ namespace FetaWarrior.DiscordFunctionality
         }
 
         [Command("help")]
-        [Summary("Displays a message providing details about the requested command.")]
         [Alias("h")]
+        [Summary("Displays a message providing details about the requested command.")]
         public async Task HelpAsync
         (
-            // I'm really not too sure about that kinda syntax
             [Remainder]
-            [Name("commandName")]
             [Summary("The name of the command. Matches a command group name, a full subcommand name or a full command name.")]
             string commandName
         )
@@ -110,34 +107,31 @@ namespace FetaWarrior.DiscordFunctionality
 
         #region Invite
         [Command("invite")]
-        [Summary("Gets the invite link for this bot.")]
         [Alias("inv")]
+        [Summary("Gets the invite link for this bot.")]
         public async Task InviteAsync()
         {
             await ReplyAsync(InviteUtilities.GenerateBotInviteLink(BotCredentials.Instance.ClientID, (ulong)BotClientManager.MinimumBotPermissions));
         }
         [Command("invite")]
-        [Summary("Gets the invite link for a bot, requesting admin permissions.")]
         [Alias("inv")]
+        [Summary("Gets the invite link for a bot, requesting admin permissions.")]
         public async Task InviteAsync
         (
             [Summary("The ID of the bot whose invite to request.")]
-            [Name("botID")]
             ulong botID
         )
         {
             await ReplyAsync(InviteUtilities.GenerateBotInviteLinkAdminPermissions(botID));
         }
         [Command("invite")]
-        [Summary("Gets the invite link for a bot, requesting the specified permissions.")]
         [Alias("inv")]
+        [Summary("Gets the invite link for a bot, requesting the specified permissions.")]
         public async Task InviteAsync
         (
             [Summary("The ID of the bot whose invite to request.")]
-            [Name("botID")]
             ulong botID,
             [Summary("The permissions integer for the bot. Refer to the Discord API for how to get this number.")]
-            [Name("permissions")]
             ulong permissions
         )
         {

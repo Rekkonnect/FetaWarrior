@@ -17,7 +17,6 @@ namespace FetaWarrior.DiscordFunctionality
         [Summary("Hugs a specified user. This command was added because the developer would greatly appreciate some hugs.")]
         public async Task HugAsync
         (
-            [Name("user")]
             [Summary("The user to hug.")]
             IUser user
         )
