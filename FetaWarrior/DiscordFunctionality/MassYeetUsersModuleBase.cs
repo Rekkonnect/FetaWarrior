@@ -2,6 +2,7 @@
 using Discord.Commands;
 using Discord.Net;
 using Discord.Rest;
+using FetaWarrior.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -17,9 +18,8 @@ namespace FetaWarrior.DiscordFunctionality
         #region Server Messages
         protected async Task MassYeetFromServerMessages(ulong firstMessageID)
         {
-            var messages = await Context.Channel.GetMessagesAsync(1).FlattenAsync();
-            var lastID = messages.First().Id;
-            await MassYeetFromServerMessages(firstMessageID, lastID);
+            var lastMessageID = (await Context.Channel.GetLastMessageAsync()).Id;
+            await MassYeetFromServerMessages(firstMessageID, lastMessageID);
         }
         protected async Task MassYeetFromServerMessages(ulong firstMessageID, ulong lastMessageID)
         {

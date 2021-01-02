@@ -1,7 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
+using FetaWarrior.Extensions;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality
@@ -15,8 +15,8 @@ namespace FetaWarrior.DiscordFunctionality
         [RequireBotPermission(ChannelPermission.ManageMessages)]
         public async Task DeleteAllMessages()
         {
-            var firstMessageID = (await Context.Channel.GetMessagesAsync(0, Direction.After, 1).FlattenAsync()).Single().Id;
-            var lastMessageID = (await Context.Channel.GetMessagesAsync(1).FlattenAsync()).Single().Id;
+            var firstMessageID = (await Context.Channel.GetFirstMessageAsync()).Id;
+            var lastMessageID = (await Context.Channel.GetLastMessageAsync()).Id;
             await DeleteMessages(firstMessageID, lastMessageID);
         }
 
@@ -31,7 +31,7 @@ namespace FetaWarrior.DiscordFunctionality
             ulong firstMessageID
         )
         {
-            var lastMessageID = (await Context.Channel.GetMessagesAsync(1).FlattenAsync()).Single().Id;
+            var lastMessageID = (await Context.Channel.GetLastMessageAsync()).Id;
             await DeleteMessages(firstMessageID, lastMessageID);
         }
         [Command("delete")]
