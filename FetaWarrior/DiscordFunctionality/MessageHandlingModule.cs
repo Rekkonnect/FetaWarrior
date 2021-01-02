@@ -8,6 +8,18 @@ namespace FetaWarrior.DiscordFunctionality
 {
     public class MessageHandlingModule : ModuleBase<SocketCommandContext>
     {
+        [Command("delete all")]
+        [Alias("remove all", "clear all")]
+        [Summary("Deletes all messages that were sent in the channel that the command was sent in.")]
+        [RequireUserPermission(ChannelPermission.ManageMessages)]
+        [RequireBotPermission(ChannelPermission.ManageMessages)]
+        public async Task DeleteAllMessages()
+        {
+            var firstMessageID = (await Context.Channel.GetMessagesAsync(0, Direction.After, 1).FlattenAsync()).Single().Id;
+            var lastMessageID = (await Context.Channel.GetMessagesAsync(1).FlattenAsync()).Single().Id;
+            await DeleteMessages(firstMessageID, lastMessageID);
+        }
+
         [Command("delete")]
         [Alias("remove", "clear")]
         [Summary("Deletes all messages after the provided message, **including** the first message. Only deletes messages in that same channel.")]
