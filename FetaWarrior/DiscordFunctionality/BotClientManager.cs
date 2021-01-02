@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using FetaWarrior.Configuration;
 using System;
 using System.Threading.Tasks;
+using static FetaWarrior.ConsoleLogging;
 using static System.Console;
 
 namespace FetaWarrior.DiscordFunctionality
@@ -206,17 +207,6 @@ namespace FetaWarrior.DiscordFunctionality
                     index = (index + 1) % lines.Length;
                 }
             }
-        }
-
-        private static void WriteCurrentTime()
-        {
-            Write($"[{DateTime.Now:dd/MM/yyyy HH:mm:ss.ffff}] ");
-        }
-        private static void WriteException(Exception e)
-        {
-            WriteLine($"Exception: {e.GetType()}\nMessage: {e.Message ?? "null"}\n\nStack trace:\n{e.StackTrace}");
-            if (e.InnerException != null)
-                WriteException(e.InnerException);
         }
     }
 }

@@ -73,6 +73,11 @@ namespace FetaWarrior.DiscordFunctionality
             if (!socketMessage.Content.StartsWith(prefix))
                 return;
 
+            ConsoleLogging.WriteCurrentTime();
+            Console.WriteLine($"{message.Author} sent a command:");
+            Console.WriteLine(socketMessage.Content);
+            Console.WriteLine();
+
             var result = await CommandService.ExecuteAsync(context, prefix.Length, null);
 
             if (!result.IsSuccess)
