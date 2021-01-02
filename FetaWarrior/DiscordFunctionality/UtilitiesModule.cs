@@ -1,7 +1,9 @@
 ﻿using Discord;
 using Discord.Commands;
 using Garyon.Extensions;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality
@@ -14,24 +16,18 @@ namespace FetaWarrior.DiscordFunctionality
         [Summary("Displays a help message containing a list of all the available commands.")]
         public async Task HelpAsync()
         {
-            EmbedBuilder embedBuilder = new EmbedBuilder
+            var embedBuilder = new EmbedBuilder
             {
                 Title = "Available Commands",
                 Description = "Use `help <command>` to get more help for individual commands.",
             };
 
-            foreach (var command in CommandHandler.AllAvailableCommands)
-            {
-                string embedFieldText = command.Summary ?? "No description available.";
-                embedBuilder.AddField(GetCommandSignature(command), embedFieldText);
-            }
-
-            await ReplyAsync(embed: embedBuilder.Build());
+            await WriteLongCommandList(CommandHandler.AllAvailableCommands, embedBuilder);
         }
 
         [Command("help")]
         [Alias("h")]
-        [Summary("Displays a message providing details about the requested command.")]
+        [Summary("Displays a message providing details about the matched command(s).")]
         public async Task HelpAsync
         (
             [Remainder]
@@ -45,6 +41,18 @@ namespace FetaWarrior.DiscordFunctionality
             if (!commands.Any())
             {
                 await ReplyAsync($"There is no command named {commandName}.");
+                return;
+            }
+
+            if (commands.Count > 4)
+            {
+                var embedBuilder = new EmbedBuilder
+                {
+                    Title = "Matched Commands",
+                    Description = "Use `help <command>` to get more help for individual commands.",
+                };
+
+                await WriteLongCommandList(commands, embedBuilder);
                 return;
             }
 
@@ -66,13 +74,31 @@ namespace FetaWarrior.DiscordFunctionality
             }
         }
 
+        private async Task WriteLongCommandList(IEnumerable<CommandInfo> commands, EmbedBuilder embedBuilder)
+        {
+            var stringBuilder = new StringBuilder("```");
+            foreach (var command in commands)
+                stringBuilder.AppendLine($"{GetCommandSignature(command)}");
+
+            stringBuilder.Append("```");
+            embedBuilder.AddField("Command List", stringBuilder);
+
+            await ReplyAsync(embed: embedBuilder.Build());
+        }
+
         private static bool MatchCommand(CommandInfo command, string match)
         {
             if (command.Module.Group == match)
                 return true;
 
+            if (command.Module.Group?.StartsWith(match) == true)
+                return true;
+
             foreach (var alias in command.Aliases)
             {
+                if (alias.StartsWith(match))
+                    return true;
+
                 if (alias == match)
                     return true;
 
