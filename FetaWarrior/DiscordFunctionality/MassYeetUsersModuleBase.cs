@@ -134,11 +134,15 @@ namespace FetaWarrior.DiscordFunctionality
             {
                 while (!yeetingComplete)
                 {
-                    await progressMessage.ModifyAsync(m => m.Content = $"{toYeet.Count} users are being {YeetActionPastParticiple}... {yeetedUserCount} users have been {YeetActionPastParticiple} so far.");
+                    var progressMessageContent = $"{toYeet.Count} users are being {YeetActionPastParticiple}... {yeetedUserCount - forbiddenOperationCount} users have been {YeetActionPastParticiple} so far.";
+                    if (forbiddenOperationCount > 0)
+                        progressMessageContent += $"\n{forbiddenOperationCount} users could not be {YeetActionPastParticiple}.";
+
+                    await progressMessage.ModifyAsync(m => m.Content = progressMessageContent);
                     await Task.Delay(1000);
                 }
 
-                var finalizedMessage = $"{toYeet.Count} users have been {YeetActionPastParticiple}.";
+                var finalizedMessage = $"{toYeet.Count - forbiddenOperationCount} users have been {YeetActionPastParticiple}.";
                 if (forbiddenOperationCount > 0)
                     finalizedMessage += $"\n{forbiddenOperationCount} users could not be {YeetActionPastParticiple}.";
 
