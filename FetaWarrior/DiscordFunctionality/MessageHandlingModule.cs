@@ -2,7 +2,9 @@
 using Discord.Commands;
 using FetaWarrior.DiscordFunctionality.Attributes;
 using FetaWarrior.Extensions;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality
@@ -152,11 +154,10 @@ namespace FetaWarrior.DiscordFunctionality
                 return;
             }
 
-            var toDelete = new HashSet<ulong>();
+            var foundMessages = new HashSet<IMessage>();
 
             var progressMessage = await contextChannel.SendMessageAsync($"Discovering messages to delete... 0 messages have been found so far.");
 
-            // firstID - 1 because the message retriever method retrieves messages after the given message's ID, excluding the original one
             for (ulong currentID = firstMessageID - 1; currentID < lastMessageID;)
             {
                 var messages = await channel.GetMessagesAsync(currentID, Direction.After, 100).FlattenAsync();
@@ -165,28 +166,64 @@ namespace FetaWarrior.DiscordFunctionality
                 {
                     var id = message.Id;
 
-                    // Set the current ID to the maximum found ID
                     if (id > currentID)
                         currentID = id;
 
                     if (id > lastMessageID)
                         continue;
 
-                    toDelete.Add(id);
+                    foundMessages.Add(message);
                 }
 
-                await progressMessage.ModifyAsync(m => m.Content = $"Discovering messages to delete... {toDelete.Count} messages have been found so far.");
+                await progressMessage.ModifyAsync(m => m.Content = $"Discovering messages to delete... {foundMessages.Count} messages have been found so far.");
             }
 
-            await progressMessage.ModifyAsync(m => m.Content = $"{toDelete.Count} messages are being deleted...");
-            await channel.DeleteMessagesAsync(toDelete);
-            await progressMessage.ModifyAsync(m => m.Content = $"{toDelete.Count} messages have been deleted.");
+            // The progress message's timestamp is being used because it was used with Discord's clock
+            // Avoiding clock difference issues
+            var threshold = progressMessage.Timestamp - TimeSpan.FromDays(14);
+            foundMessages.Split(m => m.Timestamp.UtcDateTime < threshold, out var olderMessages, out var newerMessages);
+
+            var newerMessageIDs = newerMessages.Select(m => m.Id).ToArray();
+
+            int currentlyDeletedMessages = 0;
+            bool deletionComplete = false;
+
+            await progressMessage.ModifyAsync(m => m.Content = $"{foundMessages.Count} messages are being deleted...");
+            await channel.DeleteMessagesAsync(newerMessageIDs);
+
+            currentlyDeletedMessages += newerMessageIDs.Length;
+            deletionComplete = foundMessages.Count == newerMessageIDs.Length;
+
+            if (!deletionComplete)
+            {
+                var progressMessageUpdatingTask = UpdateProgressMessage();
+
+                foreach (var message in olderMessages)
+                {
+                    await channel.DeleteMessageAsync(message);
+                    currentlyDeletedMessages++;
+                }
+
+                deletionComplete = true;
+
+                await progressMessageUpdatingTask;
+
+                async Task UpdateProgressMessage()
+                {
+                    while (!deletionComplete)
+                    {
+                        var progressMessageContent = $"{foundMessages.Count} messages are being deleted... {currentlyDeletedMessages} messages have been deleted.";
+
+                        await progressMessage.ModifyAsync(m => m.Content = progressMessageContent);
+                        await Task.Delay(1000);
+                    }
+                }
+            }
+
+            await progressMessage.ModifyAsync(m => m.Content = $"{foundMessages.Count} messages have been deleted.");
             await Task.Delay(5000);
             await progressMessage.DeleteAsync();
         }
-        #endregion
-
-        #region Delete Channel Messages
         #endregion
     }
 }
