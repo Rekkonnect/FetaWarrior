@@ -51,7 +51,7 @@ namespace FetaWarrior.Configuration
             // Try writing the information to the database; in case multiple servers have their prefixes changed
             try
             {
-                File.WriteAllLinesAsync(prefixesFilePath, prefixes.Select(kvp => $"{kvp.Key}|{kvp.Value}"));
+                File.WriteAllLinesAsync(prefixesFilePath, prefixes.Select(kvp => $"{kvp.Key}|{kvp.Value ?? DefaultPrefix}"));
             }
             catch { }
         }

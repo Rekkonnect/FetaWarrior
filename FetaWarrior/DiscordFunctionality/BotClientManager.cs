@@ -128,16 +128,14 @@ namespace FetaWarrior.DiscordFunctionality
             await Client.LoginAsync(TokenType.Bot, BotCredentials.Instance.BotToken);
             await Client.StartAsync();
 
-            WriteCurrentTime();
-            WriteLine("Socket client logged in");
+            WriteEventWithCurrentTime("Socket client logged in");
         }
         private async Task LoginRestClient()
         {
             InitializeNewRestClient();
             await RestClient.LoginAsync(TokenType.Bot, BotCredentials.Instance.BotToken);
 
-            WriteCurrentTime();
-            WriteLine("REST client logged in");
+            WriteEventWithCurrentTime("REST client logged in");
         }
 
         private async Task LogoutSocketClient()
@@ -148,8 +146,7 @@ namespace FetaWarrior.DiscordFunctionality
             await Client.StopAsync();
             await Client.LogoutAsync();
 
-            WriteCurrentTime();
-            WriteLine("Socket client logged out");
+            WriteEventWithCurrentTime("Socket client logged out");
         }
         private async Task LogoutRestClient()
         {
@@ -158,26 +155,22 @@ namespace FetaWarrior.DiscordFunctionality
 
             await RestClient.LogoutAsync();
 
-            WriteCurrentTime();
-            WriteLine("REST client logged out");
+            WriteEventWithCurrentTime("REST client logged out");
         }
 
         #region Disconnection Loggers
         private async Task LogSocketClientDisconnection(Exception e)
         {
-            WriteCurrentTime();
-            WriteLine("Socket client disconnected");
+            WriteEventWithCurrentTime("Socket client disconnected");
             WriteException(e);
         }
         private async Task LogSocketClientDisconnection()
         {
-            WriteCurrentTime();
-            WriteLine("Socket client disconnected");
+            WriteEventWithCurrentTime("Socket client disconnected");
         }
         private async Task LogRestClientDisconnection()
         {
-            WriteCurrentTime();
-            WriteLine("REST client disconnected");
+            WriteEventWithCurrentTime("REST client disconnected");
         }
         #endregion
 

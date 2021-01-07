@@ -73,10 +73,7 @@ namespace FetaWarrior.DiscordFunctionality
             if (!socketMessage.Content.StartsWith(prefix))
                 return;
 
-            ConsoleLogging.WriteCurrentTime();
-            Console.WriteLine($"{message.Author} sent a command:");
-            Console.WriteLine(socketMessage.Content);
-            Console.WriteLine();
+            ConsoleLogging.WriteEventWithCurrentTime($"{message.Author} sent a command:\n{socketMessage.Content}");
 
             var result = await CommandService.ExecuteAsync(context, prefix.Length, null);
 
@@ -94,7 +91,7 @@ namespace FetaWarrior.DiscordFunctionality
                             // The reason why this help message is not "{prefix}help {command}" is because there is no good way to get the full name of the command
                             CommandError.BadArgCount => $"Unexpected argument count, use `{prefix}help <command>` to get more help regarding this command.",
                             CommandError.ParseFailed => $"Failed to parse the command, use `{prefix}help` to get more help about the available commands.",
-                            CommandError.UnmetPrecondition => $"This command is not for you.",
+                            CommandError.UnmetPrecondition => $"Failed to execute the command, either because this is not for you, or this is not the right place to do it.",
 
                             CommandError.ObjectNotFound or 
                             CommandError.MultipleMatches or 

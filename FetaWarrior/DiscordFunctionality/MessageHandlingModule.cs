@@ -122,13 +122,13 @@ namespace FetaWarrior.DiscordFunctionality
         public async Task DeleteOtherChannelMessages
         (
             [Summary("The channel on which the the messages to delete are contained.")]
-            ITextChannel channel,
+            ITextChannel textChannel,
             [Summary("The ID of the first message that will be deleted, **inclusive**.")]
             ulong firstMessageID
         )
         {
-            var lastMessageID = (await channel.GetLastMessageAsync()).Id;
-            await DeleteOtherChannelMessages(channel, firstMessageID, lastMessageID);
+            var lastMessageID = (await textChannel.GetLastMessageAsync()).Id;
+            await DeleteOtherChannelMessages(textChannel, firstMessageID, lastMessageID);
         }
         [Command("delete oc")]
         [Alias("remove oc", "clear oc")]
@@ -139,7 +139,7 @@ namespace FetaWarrior.DiscordFunctionality
         public async Task DeleteOtherChannelMessages
         (
             [Summary("The channel on which the the messages to delete are contained.")]
-            ITextChannel channel,
+            ITextChannel textChannel,
             [Summary("The ID of the first message that will be deleted, **inclusive**.")]
             ulong firstMessageID,
             [Summary("The ID of the last message that will be deleted, **inclusive**.")]
@@ -157,10 +157,11 @@ namespace FetaWarrior.DiscordFunctionality
             var foundMessages = new HashSet<IMessage>();
 
             var progressMessage = await contextChannel.SendMessageAsync($"Discovering messages to delete... 0 messages have been found so far.");
+            var progressMessageTimestamp = progressMessage.Timestamp;
 
             for (ulong currentID = firstMessageID - 1; currentID < lastMessageID;)
             {
-                var messages = await channel.GetMessagesAsync(currentID, Direction.After, 100).FlattenAsync();
+                var messages = await textChannel.GetMessagesAsync(currentID, Direction.After, 100).FlattenAsync();
 
                 foreach (var message in messages)
                 {
@@ -180,7 +181,7 @@ namespace FetaWarrior.DiscordFunctionality
 
             // The progress message's timestamp is being used because it was used with Discord's clock
             // Avoiding clock difference issues
-            var threshold = progressMessage.Timestamp - TimeSpan.FromDays(14);
+            var threshold = progressMessageTimestamp - TimeSpan.FromDays(14);
             foundMessages.Split(m => m.Timestamp.UtcDateTime < threshold, out var olderMessages, out var newerMessages);
 
             var newerMessageIDs = newerMessages.Select(m => m.Id).ToArray();
@@ -189,7 +190,7 @@ namespace FetaWarrior.DiscordFunctionality
             bool deletionComplete = false;
 
             await progressMessage.ModifyAsync(m => m.Content = $"{foundMessages.Count} messages are being deleted...");
-            await channel.DeleteMessagesAsync(newerMessageIDs);
+            await textChannel.DeleteMessagesAsync(newerMessageIDs);
 
             currentlyDeletedMessages += newerMessageIDs.Length;
             deletionComplete = foundMessages.Count == newerMessageIDs.Length;
@@ -200,7 +201,7 @@ namespace FetaWarrior.DiscordFunctionality
 
                 foreach (var message in olderMessages)
                 {
-                    await channel.DeleteMessageAsync(message);
+                    await textChannel.DeleteMessageAsync(message);
                     currentlyDeletedMessages++;
                 }
 

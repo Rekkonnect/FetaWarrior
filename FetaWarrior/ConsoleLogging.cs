@@ -5,6 +5,8 @@ namespace FetaWarrior
 {
     public static class ConsoleLogging
     {
+        private static object writingLock = new object();
+
         public static void WriteCurrentTime()
         {
             Write($"[{DateTime.Now:dd/MM/yyyy HH:mm:ss.ffff}] ");
@@ -14,6 +16,15 @@ namespace FetaWarrior
             WriteLine($"Exception: {e.GetType()}\nMessage: {e.Message ?? "null"}\n\nStack trace:\n{e.StackTrace}");
             if (e.InnerException != null)
                 WriteException(e.InnerException);
+        }
+
+        public static void WriteEventWithCurrentTime(string message)
+        {
+            lock (writingLock)
+            {
+                WriteCurrentTime();
+                WriteLine($"{message}\n");
+            }
         }
     }
 }
