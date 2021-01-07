@@ -156,8 +156,10 @@ namespace FetaWarrior.DiscordFunctionality
 
             var foundMessages = new HashSet<IMessage>();
 
-            var progressMessage = await contextChannel.SendMessageAsync($"Discovering messages to delete... 0 messages have been found so far.");
-            var progressMessageTimestamp = progressMessage.Timestamp;
+            var originalProgressMessage = await contextChannel.SendMessageAsync($"Discovering messages to delete... 0 messages have been found so far.");
+            var progressMessageTimestamp = originalProgressMessage.Timestamp;
+
+            var persistentProgressMessage = new PersistentMessage(originalProgressMessage);
 
             for (ulong currentID = firstMessageID - 1; currentID < lastMessageID;)
             {
@@ -176,7 +178,7 @@ namespace FetaWarrior.DiscordFunctionality
                     foundMessages.Add(message);
                 }
 
-                await progressMessage.ModifyAsync(m => m.Content = $"Discovering messages to delete... {foundMessages.Count} messages have been found so far.");
+                await persistentProgressMessage.SetContentAsync($"Discovering messages to delete... {foundMessages.Count} messages have been found so far.");
             }
 
             // The progress message's timestamp is being used because it was used with Discord's clock
@@ -189,7 +191,7 @@ namespace FetaWarrior.DiscordFunctionality
             int currentlyDeletedMessages = 0;
             bool deletionComplete = false;
 
-            await progressMessage.ModifyAsync(m => m.Content = $"{foundMessages.Count} messages are being deleted...");
+            await persistentProgressMessage.SetContentAsync($"{foundMessages.Count} messages are being deleted...");
             await textChannel.DeleteMessagesAsync(newerMessageIDs);
 
             currentlyDeletedMessages += newerMessageIDs.Length;
@@ -215,15 +217,15 @@ namespace FetaWarrior.DiscordFunctionality
                     {
                         var progressMessageContent = $"{foundMessages.Count} messages are being deleted... {currentlyDeletedMessages} messages have been deleted.";
 
-                        await progressMessage.ModifyAsync(m => m.Content = progressMessageContent);
+                        await persistentProgressMessage.SetContentAsync(progressMessageContent);
                         await Task.Delay(1000);
                     }
                 }
             }
 
-            await progressMessage.ModifyAsync(m => m.Content = $"{foundMessages.Count} messages have been deleted.");
+            await persistentProgressMessage.SetContentAsync($"{foundMessages.Count} messages have been deleted.");
             await Task.Delay(5000);
-            await progressMessage.DeleteAsync();
+            await persistentProgressMessage.DeleteAsync();
         }
         #endregion
     }

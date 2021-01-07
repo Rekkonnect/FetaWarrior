@@ -28,7 +28,8 @@ namespace FetaWarrior.DiscordFunctionality
 
             var toYeet = new HashSet<ulong>();
 
-            var progressMessage = await Context.Channel.SendMessageAsync($"Discovering users to {YeetAction}... 0 users have been found so far.");
+            var originalProgressMessage = await Context.Channel.SendMessageAsync($"Discovering users to {YeetAction}... 0 users have been found so far.");
+            var persistentProgressMessage = new PersistentMessage(originalProgressMessage);
 
             // firstID - 1 because the message retriever method retrieves messages after the given message's ID, excluding the original one
             for (ulong currentID = firstMessageID - 1; currentID < lastMessageID;)
@@ -55,10 +56,10 @@ namespace FetaWarrior.DiscordFunctionality
                     toYeet.Add(s.Author.Id);
                 }
 
-                await progressMessage.ModifyAsync(m => m.Content = $"Discovering users to {YeetAction}... {toYeet.Count} users have been found so far.");
+                await persistentProgressMessage.SetContentAsync("Discovering users to {YeetAction}... {toYeet.Count} users have been found so far.");
             }
 
-            await MassYeetWithProgress(toYeet, progressMessage);
+            await MassYeetWithProgress(toYeet, persistentProgressMessage);
         }
         #endregion
         #region Join Date
@@ -80,24 +81,25 @@ namespace FetaWarrior.DiscordFunctionality
         {
             var restGuild = await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
 
-            var progressMessage = await Context.Channel.SendMessageAsync("Retrieving guild member list...");
+            var originalProgressMessage = await Context.Channel.SendMessageAsync("Retrieving guild member list...");
+            var persistentProgressMessage = new PersistentMessage(originalProgressMessage);
 
             var users = await restGuild.GetUsersAsync().FlattenAsync();
 
-            await progressMessage.ModifyAsync(m => m.Content = $"Discovering users to {YeetAction}...");
+            await persistentProgressMessage.SetContentAsync($"Discovering users to {YeetAction}...");
 
             var firstUser = users.First(u => u.Id == firstUserID);
             var lastUser = users.First(u => u.Id == lastUserID);
 
             var toBan = users.Where(u => u.JoinedAt >= firstUser.JoinedAt && u.JoinedAt <= lastUser.JoinedAt).Select(u => u.Id).ToArray();
 
-            await MassYeetWithProgress(toBan, progressMessage);
+            await MassYeetWithProgress(toBan, persistentProgressMessage);
         }
         #endregion
 
         protected abstract Task YeetUser(ulong userID, string reason);
 
-        private async Task MassYeetWithProgress(ICollection<ulong> toYeet, RestUserMessage progressMessage)
+        private async Task MassYeetWithProgress(ICollection<ulong> toYeet, PersistentMessage persistentProgressMessage)
         {
             int yeetedUserCount = 0;
             int forbiddenOperationCount = 0;
@@ -138,7 +140,7 @@ namespace FetaWarrior.DiscordFunctionality
                     if (forbiddenOperationCount > 0)
                         progressMessageContent += $"\n{forbiddenOperationCount} users could not be {YeetActionPastParticiple}.";
 
-                    await progressMessage.ModifyAsync(m => m.Content = progressMessageContent);
+                    await persistentProgressMessage.SetContentAsync(progressMessageContent);
                     await Task.Delay(1000);
                 }
 
@@ -146,7 +148,7 @@ namespace FetaWarrior.DiscordFunctionality
                 if (forbiddenOperationCount > 0)
                     finalizedMessage += $"\n{forbiddenOperationCount} users could not be {YeetActionPastParticiple}.";
 
-                await progressMessage.ModifyAsync(m => m.Content = finalizedMessage);
+                await persistentProgressMessage.SetContentAsync(finalizedMessage);
             }
         }
     }
