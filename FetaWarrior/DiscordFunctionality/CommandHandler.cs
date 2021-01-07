@@ -50,10 +50,6 @@ namespace FetaWarrior.DiscordFunctionality
         public void AddEvents(DiscordSocketClient client)
         {
             client.MessageReceived += HandleCommandAsync;
-
-            // For the time being no commands care about reactions, better not overload the bot
-            //Client.ReactionAdded += HandleReactionAddedAsync;
-            //Client.ReactionRemoved += HandleReactionRemovedAsync;
         }
 
         #region Handlers
@@ -75,6 +71,10 @@ namespace FetaWarrior.DiscordFunctionality
 
             ConsoleLogging.WriteEventWithCurrentTime($"{message.Author} sent a command:\n{socketMessage.Content}");
 
+            ExecuteCommandAsync(context, prefix);
+        }
+        private async Task ExecuteCommandAsync(SocketCommandContext context, string prefix)
+        {
             var result = await CommandService.ExecuteAsync(context, prefix.Length, null);
 
             if (!result.IsSuccess)
@@ -93,9 +93,9 @@ namespace FetaWarrior.DiscordFunctionality
                             CommandError.ParseFailed => $"Failed to parse the command, use `{prefix}help` to get more help about the available commands.",
                             CommandError.UnmetPrecondition => $"Failed to execute the command, either because this is not for you, or this is not the right place to do it.",
 
-                            CommandError.ObjectNotFound or 
-                            CommandError.MultipleMatches or 
-                            CommandError.Exception or 
+                            CommandError.ObjectNotFound or
+                            CommandError.MultipleMatches or
+                            CommandError.Exception or
                             CommandError.Unsuccessful => $"Developer is bad, error was caused by his fault.\nError information: {error} - {result.ErrorReason}",
 
                             _ => "Unknown issue occurred.",
@@ -128,15 +128,6 @@ namespace FetaWarrior.DiscordFunctionality
                     Console.WriteLine($"Error Parameter: {parseResult.ErrorParameter}");
                 }
             }
-        }
-        // Future-proofing those functions' existence
-        private async Task HandleReactionAddedAsync(Cacheable<IUserMessage, ulong> cacheable, ISocketMessageChannel channel, SocketReaction reaction)
-        {
-            // Handle reactions on already active commands
-        }
-        private async Task HandleReactionRemovedAsync(Cacheable<IUserMessage, ulong> cacheable, ISocketMessageChannel channel, SocketReaction reaction)
-        {
-            // Handle reactions on already active commands
         }
         #endregion
     }
