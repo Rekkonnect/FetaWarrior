@@ -154,31 +154,16 @@ namespace FetaWarrior.DiscordFunctionality
                 return;
             }
 
-            var foundMessages = new HashSet<IMessage>();
-
             var originalProgressMessage = await contextChannel.SendMessageAsync($"Discovering messages to delete... 0 messages have been found so far.");
             var progressMessageTimestamp = originalProgressMessage.Timestamp;
 
             var persistentProgressMessage = new PersistentMessage(originalProgressMessage);
 
-            for (ulong currentID = firstMessageID - 1; currentID < lastMessageID;)
+            var foundMessages = await contextChannel.GetMessageRangeAsync(firstMessageID, lastMessageID, UpdateMessage);
+
+            async Task UpdateMessage(int messages)
             {
-                var messages = await textChannel.GetMessagesAsync(currentID, Direction.After, 100).FlattenAsync();
-
-                foreach (var message in messages)
-                {
-                    var id = message.Id;
-
-                    if (id > currentID)
-                        currentID = id;
-
-                    if (id > lastMessageID)
-                        continue;
-
-                    foundMessages.Add(message);
-                }
-
-                await persistentProgressMessage.SetContentAsync($"Discovering messages to delete... {foundMessages.Count} messages have been found so far.");
+                await persistentProgressMessage.SetContentAsync($"Discovering users to delete... {messages} messages have been found so far.");
             }
 
             // The progress message's timestamp is being used because it was used with Discord's clock

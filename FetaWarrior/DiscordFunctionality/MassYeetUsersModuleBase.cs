@@ -26,40 +26,20 @@ namespace FetaWarrior.DiscordFunctionality
             var guild = Context.Guild;
             var channel = guild.SystemChannel;
 
-            var toYeet = new HashSet<ulong>();
-
             var originalProgressMessage = await Context.Channel.SendMessageAsync($"Discovering users to {YeetAction}... 0 users have been found so far.");
             var persistentProgressMessage = new PersistentMessage(originalProgressMessage);
 
-            // firstID - 1 because the message retriever method retrieves messages after the given message's ID, excluding the original one
-            for (ulong currentID = firstMessageID - 1; currentID < lastMessageID;)
-            {
-                var messages = await channel.GetMessagesAsync(currentID, Direction.After, 100).FlattenAsync();
-
-                foreach (var message in messages)
-                {
-                    var id = message.Id;
-
-                    // Set the current ID to the maximum found ID
-                    if (id > currentID)
-                        currentID = id;
-
-                    if (id > lastMessageID)
-                        continue;
-
-                    if (message is not RestSystemMessage s)
-                        continue;
-
-                    if (s.Type != MessageType.GuildMemberJoin)
-                        continue;
-
-                    toYeet.Add(s.Author.Id);
-                }
-
-                await persistentProgressMessage.SetContentAsync($"Discovering users to {YeetAction}... {toYeet.Count} users have been found so far.");
-            }
+            var toYeet = (await channel.GetMessageRangeAsync(firstMessageID, lastMessageID, IsGuildMemberJoinSystemMessage, UpdateMessage)).Select(sm => sm.Author.Id).ToArray();
 
             await MassYeetWithProgress(toYeet, persistentProgressMessage);
+
+            // Functions
+            static bool IsGuildMemberJoinSystemMessage(IMessage m) => m.Type == MessageType.GuildMemberJoin;
+
+            async Task UpdateMessage(int messages)
+            {
+                await persistentProgressMessage.SetContentAsync($"Discovering users to {YeetAction}... {messages} users have been found so far.");
+            }
         }
         #endregion
         #region Join Date
