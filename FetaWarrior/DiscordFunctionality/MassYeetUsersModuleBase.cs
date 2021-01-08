@@ -56,7 +56,7 @@ namespace FetaWarrior.DiscordFunctionality
                     toYeet.Add(s.Author.Id);
                 }
 
-                await persistentProgressMessage.SetContentAsync("Discovering users to {YeetAction}... {toYeet.Count} users have been found so far.");
+                await persistentProgressMessage.SetContentAsync($"Discovering users to {YeetAction}... {toYeet.Count} users have been found so far.");
             }
 
             await MassYeetWithProgress(toYeet, persistentProgressMessage);
@@ -88,8 +88,19 @@ namespace FetaWarrior.DiscordFunctionality
 
             await persistentProgressMessage.SetContentAsync($"Discovering users to {YeetAction}...");
 
-            var firstUser = users.First(u => u.Id == firstUserID);
-            var lastUser = users.First(u => u.Id == lastUserID);
+            var firstUser = users.FirstOrDefault(u => u.Id == firstUserID);
+            if (firstUser == null)
+            {
+                await Context.Channel.SendMessageAsync($"The first user ID {firstUserID} could not be found in this server.");
+                return;
+            }
+
+            var lastUser = users.FirstOrDefault(u => u.Id == lastUserID);
+            if (lastUser == null)
+            {
+                await Context.Channel.SendMessageAsync($"The last user ID {lastUserID} could not be found in this server.");
+                return;
+            }
 
             var toBan = users.Where(u => u.JoinedAt >= firstUser.JoinedAt && u.JoinedAt <= lastUser.JoinedAt).Select(u => u.Id).ToArray();
 
