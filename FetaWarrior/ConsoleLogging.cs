@@ -13,9 +13,10 @@ namespace FetaWarrior
         }
         public static void WriteException(Exception e)
         {
-            WriteLine($"Exception: {e.GetType()}\nMessage: {e.Message ?? "null"}\n\nStack trace:\n{e.StackTrace}");
+            WriteLine($"Exception: {e.GetType()}\nMessage: {e.Message ?? "null"}\nStack trace:\n{e.StackTrace}");
             if (e.InnerException != null)
                 WriteException(e.InnerException);
+            WriteLine();
         }
 
         public static void WriteEventWithCurrentTime(string message)

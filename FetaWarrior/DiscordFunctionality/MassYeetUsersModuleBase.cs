@@ -71,14 +71,14 @@ namespace FetaWarrior.DiscordFunctionality
             var firstUser = users.FirstOrDefault(u => u.Id == firstUserID);
             if (firstUser == null)
             {
-                await Context.Channel.SendMessageAsync($"The first user ID {firstUserID} could not be found in this server.");
+                await persistentProgressMessage.SetContentAsync($"The first user ID {firstUserID} could not be found in this server.");
                 return;
             }
 
             var lastUser = users.FirstOrDefault(u => u.Id == lastUserID);
             if (lastUser == null)
             {
-                await Context.Channel.SendMessageAsync($"The last user ID {lastUserID} could not be found in this server.");
+                await persistentProgressMessage.SetContentAsync($"The last user ID {lastUserID} could not be found in this server.");
                 return;
             }
 
