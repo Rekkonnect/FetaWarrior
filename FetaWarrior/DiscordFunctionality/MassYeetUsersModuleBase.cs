@@ -1,5 +1,4 @@
 ﻿using Discord;
-using Discord.Commands;
 using Discord.Net;
 using FetaWarrior.Extensions;
 using System.Collections.Generic;
@@ -9,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality
 {
-    public abstract class MassYeetUsersModuleBase : ModuleBase<SocketCommandContext>
+    public abstract class MassYeetUsersModuleBase : SocketModule
     {
         protected abstract string YeetAction { get; }
         protected abstract string YeetActionPastParticiple { get; }

@@ -3,13 +3,12 @@ using Discord.Commands;
 using FetaWarrior.DiscordFunctionality.Attributes;
 using FetaWarrior.Extensions;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality
 {
-    public class MessageHandlingModule : ModuleBase<SocketCommandContext>
+    public class MessageHandlingModule : SocketModule
     {
         #region Delete All
         [Command("delete all")]

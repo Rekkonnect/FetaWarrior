@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality
 {
-    public class TestModule : ModuleBase<SocketCommandContext>
+    public class TestModule : SocketModule
     {
 #if TEST
         [Command("testadmin")]

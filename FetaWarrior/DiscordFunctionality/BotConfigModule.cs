@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality
 {
-    public class BotConfigModule : ModuleBase<SocketCommandContext>
+    public class BotConfigModule : SocketModule
     {
         [Command("prefix")]
         [Summary("Displays the current prefix for this bot on this server.")]

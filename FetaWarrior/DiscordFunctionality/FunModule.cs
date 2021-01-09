@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality
 {
-    public class FunModule : GuildSocketModuleBase
+    public class FunModule : SocketModule
     {
         #region Hugs
         [Command("hug")]

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality
 {
-    public class UtilitiesModule : ModuleBase<TimestampedSocketCommandContext>
+    public class UtilitiesModule : SocketModule
     {
         #region Help
         [Command("help")]

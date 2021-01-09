@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace FetaWarrior.DiscordFunctionality
 {
     [RequireOwner]
-    public class OwnerModule : ModuleBase<SocketCommandContext>
+    public class OwnerModule : SocketModule
     {
         #region Guilds
         [Command("guilds")]
