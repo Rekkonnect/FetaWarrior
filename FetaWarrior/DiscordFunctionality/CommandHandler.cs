@@ -1,11 +1,11 @@
-﻿using Discord;
-using Discord.Commands;
+﻿using Discord.Commands;
 using Discord.Rest;
 using Discord.WebSocket;
 using FetaWarrior.Configuration;
 using FetaWarrior.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -16,6 +16,7 @@ namespace FetaWarrior.DiscordFunctionality
         public static CommandHandler GlobalCommandHandler { get; private set; }
 
         public static IEnumerable<CommandInfo> AllAvailableCommands => GlobalCommandHandler.CommandService.Commands;
+        public static IEnumerable<CommandInfo> AllPubliclyAvailableCommands => AllAvailableCommands.Where(c => !c.HasPrecondition<RequireOwnerAttribute>());
 
         public static DiscordSocketClient Client => BotClientManager.Instance.Client;
         public static DiscordRestClient RestClient => BotClientManager.Instance.RestClient;

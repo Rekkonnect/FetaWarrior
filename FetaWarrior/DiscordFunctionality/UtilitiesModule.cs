@@ -22,7 +22,7 @@ namespace FetaWarrior.DiscordFunctionality
                 Description = "Use `help <command>` to get more help for individual commands.",
             };
 
-            await WriteLongCommandList(CommandHandler.AllAvailableCommands, embedBuilder);
+            await WriteLongCommandList(CommandHandler.AllPubliclyAvailableCommands, embedBuilder);
         }
 
         [Command("help")]
@@ -36,7 +36,7 @@ namespace FetaWarrior.DiscordFunctionality
         )
         {
             commandName = commandName.ToLower();
-            var commands = CommandHandler.AllAvailableCommands.Where(c => MatchCommand(c, commandName)).ToList();
+            var commands = CommandHandler.AllPubliclyAvailableCommands.Where(c => MatchCommand(c, commandName)).ToList();
 
             if (!commands.Any())
             {

@@ -1,7 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.Net;
-using Discord.Rest;
 using FetaWarrior.Extensions;
 using System.Collections.Generic;
 using System.Linq;
