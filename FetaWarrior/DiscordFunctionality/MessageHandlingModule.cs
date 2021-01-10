@@ -29,7 +29,7 @@ namespace FetaWarrior.DiscordFunctionality
         [RequireBotPermission(GuildPermission.ManageMessages)]
         public async Task DeleteAllMessages
         (
-            [Summary("The channel ID of the channel whose all messages to delete.")]
+            [Summary("The channel on which the the messages to delete are contained.")]
             ITextChannel textChannel
         )
         {
@@ -158,7 +158,7 @@ namespace FetaWarrior.DiscordFunctionality
 
             var persistentProgressMessage = new PersistentMessage(originalProgressMessage);
 
-            var foundMessages = await contextChannel.GetMessageRangeAsync(firstMessageID, lastMessageID, UpdateMessage);
+            var foundMessages = await textChannel.GetMessageRangeAsync(firstMessageID, lastMessageID, UpdateMessage);
 
             async Task UpdateMessage(int messages)
             {
