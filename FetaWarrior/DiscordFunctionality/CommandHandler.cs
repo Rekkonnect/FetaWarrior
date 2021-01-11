@@ -81,6 +81,8 @@ namespace FetaWarrior.DiscordFunctionality
             if (!result.IsSuccess)
             {
                 var error = result.Error;
+                Console.WriteLine(error);
+
                 switch (error)
                 {
                     case CommandError.UnknownCommand:
@@ -126,7 +128,7 @@ namespace FetaWarrior.DiscordFunctionality
                             Console.WriteLine(value);
 
                     Console.WriteLine();
-                    Console.WriteLine($"Error Parameter: {parseResult.ErrorParameter}");
+                    Console.WriteLine($"Error Parameter: {parseResult.ErrorParameter}\n");
                 }
             }
         }

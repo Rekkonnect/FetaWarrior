@@ -11,7 +11,7 @@ namespace FetaWarrior
         {
             Task.WaitAll(BotClientManager.Instance.InitializeLogin());
 
-            WriteLine("Press the ESC key to log out at any time.");
+            WriteLine("Press the ESC key to log out at any time.\n");
             while (ReadKey(true).Key != ConsoleKey.Escape);
 
             Task.WaitAll(BotClientManager.Instance.Logout());
