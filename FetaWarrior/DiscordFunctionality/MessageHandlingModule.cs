@@ -8,15 +8,17 @@ using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality
 {
+    [RequireGuildContext]
+    [RequireUserPermission(ChannelPermission.ManageMessages, Group = "User")]
+    [RequireUserPermission(GuildPermission.ManageMessages, Group = "User")]
+    [RequireBotPermission(ChannelPermission.ManageMessages, Group = "Bot")]
+    [RequireBotPermission(GuildPermission.ManageMessages, Group = "Bot")]
     public class MessageHandlingModule : SocketModule
     {
         #region Delete All
         [Command("delete all")]
         [Alias("remove all", "clear all")]
         [Summary("Deletes all messages that were sent in the channel that the command was sent in.")]
-        [RequireGuildContext]
-        [RequireUserPermission(ChannelPermission.ManageMessages)]
-        [RequireBotPermission(ChannelPermission.ManageMessages)]
         public async Task DeleteAllMessages()
         {
             await DeleteAllMessages(Context.Channel as ITextChannel);
@@ -24,9 +26,6 @@ namespace FetaWarrior.DiscordFunctionality
         [Command("delete all")]
         [Alias("remove all", "clear all")]
         [Summary("Deletes all messages that were sent in the specified channel.")]
-        [RequireGuildContext]
-        [RequireUserPermission(GuildPermission.ManageMessages)]
-        [RequireBotPermission(GuildPermission.ManageMessages)]
         public async Task DeleteAllMessages
         (
             [Summary("The channel on which the the messages to delete are contained.")]
@@ -53,9 +52,6 @@ namespace FetaWarrior.DiscordFunctionality
         [Command("delete all")]
         [Alias("remove all", "clear all")]
         [Summary("Deletes all messages that were sent in the specified channel.")]
-        [RequireGuildContext]
-        [RequireUserPermission(GuildPermission.ManageMessages)]
-        [RequireBotPermission(GuildPermission.ManageMessages)]
         public async Task DeleteAllMessages
         (
             [Summary("The channel ID of the channel whose all messages to delete.")]
@@ -82,9 +78,6 @@ namespace FetaWarrior.DiscordFunctionality
         [Command("delete here")]
         [Alias("remove here", "clear here")]
         [Summary("Deletes all messages from this channel that were sent after the provided message, **including** the first message. Only deletes messages in this channel.")]
-        [RequireGuildContext]
-        [RequireUserPermission(ChannelPermission.ManageMessages)]
-        [RequireBotPermission(ChannelPermission.ManageMessages)]
         public async Task DeleteThisChannelMessages
         (
             [Summary("The ID of the first message that will be deleted, **inclusive**.")]
@@ -96,9 +89,6 @@ namespace FetaWarrior.DiscordFunctionality
         [Command("delete here")]
         [Alias("remove here", "clear here")]
         [Summary("Deletes all messages from a specified channel that were sent within the provided message range, **including** the first and the last messages. Only deletes messages in that same channel.")]
-        [RequireGuildContext]
-        [RequireUserPermission(ChannelPermission.ManageMessages)]
-        [RequireBotPermission(ChannelPermission.ManageMessages)]
         public async Task DeleteThisChannelMessages
         (
             [Summary("The ID of the first message that will be deleted, **inclusive**.")]
@@ -115,9 +105,6 @@ namespace FetaWarrior.DiscordFunctionality
         [Command("delete oc")]
         [Alias("remove oc", "clear oc")]
         [Summary("Deletes all messages from a specified channel that were sent after the provided message, **including** the first message. Only deletes messages in that same channel.")]
-        [RequireGuildContext]
-        [RequireUserPermission(ChannelPermission.ManageMessages)]
-        [RequireBotPermission(ChannelPermission.ManageMessages)]
         public async Task DeleteOtherChannelMessages
         (
             [Summary("The channel on which the the messages to delete are contained.")]
@@ -132,9 +119,6 @@ namespace FetaWarrior.DiscordFunctionality
         [Command("delete oc")]
         [Alias("remove oc", "clear oc")]
         [Summary("Deletes all messages from a specified channel that were sent within the provided message range, **including** the first and the last messages. Only deletes messages in that same channel.")]
-        [RequireGuildContext]
-        [RequireUserPermission(ChannelPermission.ManageMessages)]
-        [RequireBotPermission(ChannelPermission.ManageMessages)]
         public async Task DeleteOtherChannelMessages
         (
             [Summary("The channel on which the the messages to delete are contained.")]
