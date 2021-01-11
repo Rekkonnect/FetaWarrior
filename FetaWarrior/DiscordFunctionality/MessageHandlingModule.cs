@@ -167,8 +167,8 @@ namespace FetaWarrior.DiscordFunctionality
 
             // The progress message's timestamp is being used because it was used with Discord's clock
             // Avoiding clock difference issues
-            var threshold = progressMessageTimestamp - TimeSpan.FromDays(14);
-            foundMessages.Split(m => m.Timestamp.UtcDateTime < threshold, out var olderMessages, out var newerMessages);
+            var threshold = progressMessageTimestamp.UtcDateTime - TimeSpan.FromDays(14);
+            foundMessages.Dissect(m => m.Timestamp.UtcDateTime < threshold, out var olderMessages, out var newerMessages);
 
             var newerMessageIDs = newerMessages.Select(m => m.Id).ToArray();
 

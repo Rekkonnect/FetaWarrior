@@ -6,7 +6,7 @@ namespace FetaWarrior.Extensions
 {
     public static class IEnumerableExtensions
     {
-        public static void Split<T>(this IEnumerable<T> collection, Predicate<T> predicate, out IEnumerable<T> matched, out IEnumerable<T> unmatched)
+        public static void Dissect<T>(this IEnumerable<T> collection, Predicate<T> predicate, out IEnumerable<T> matched, out IEnumerable<T> unmatched)
         {
             if (!collection.Any())
             {
