@@ -16,31 +16,20 @@ Permissions required:
 ## General Information
 
 - All commands have a default prefix of `=`.
-- `=help`: Shows all the available commands
+- `=help`: Shows all the available commands, or commands that match the given 
+- `=ping`: Gets an estimation of the current latency. It uses Discord.NET's Client.Latency property, which is not updated too frequently. Multiple consecutive commands might yield the same result due to that.
 - `=prefix`: Gets, sets or resets the prefix for the server. (Use `=help prefix` for more details).
 
 ## Functionality
 
-- **Mass ban members based on system welcome messages**
-  - The command (`=massban sm`) bans all users that were greeted with server messages in the channel that is set to send server welcome messages in. It is currently not adjustable, so if the channel was changed after the users that are intended to be banned, the command will only look for messages in the new channel. You will have to set the setting back to what the channel was when the to-ban users joined.
-  - Example: `=massban sm 786063455639044097 786078457812484126`
-    - This will ban all users whose system welcome messages' IDs range within [786063455639044097, 786078457812484126], **including** the provided IDs.
-- **Mass ban members based on join dates**
-  - The command (`=massban jd`) bans all users that joined within a specified timeframe, which is determined by specified users. The start of the timeframe (the least recent) is determined by the join date (and time) of the first user that was provided in the arguments, and the end of the timeframe (the most recent) is determined by the join date of the last user that was provided in the arguments. Note that first and last do not imply a list of users. Only providing 2 user IDs.
-  - Example: `=massban jd 786063455639044097 786078457812484126`
-    - This will ban all users that joined within the join date of the users 786063455639044097, and 786078457812484126, **including** the users with the provided IDs.
-- Respective commands for kicking members instead of banning (`masskick` instead of `massban`).
-- **Delete messages within a specified range**
-  - The command (`=delete`) deletes all messages that were sent after a specified message and before another specified message, or until the message that includes the command. It uses the bulk message deletion endpoint for server messages, and as a result might not be logged on certain logging bots.
-  - Example: `=delete 793246033324146689 793246975277137940`
-    - This will delete all messages that were sent after the message with ID 793246033324146689 was sent, and before the message with ID 793246975277137940 was sent, **including** the messages with the provided IDs.
-  - Another example: `=delete 793246033324146689`
-    - This will delete all messages that were sent after the message with ID 793246033324146689 was sent, and before the message that triggers the command was sent, **including** the first message with the provided ID, but **excluding** the command message.
+- **Mass kick/ban members based on system messages**
+- **Mass kick/ban members based on join dates**
+- **Delete messages in a specified channel within a specified range**
+- **Delete all messages sent in a specified channel**
   
 ## Planned Functionality
 
 - Mass delete messages by user
-- Mass delete messages in channels
 
 # Libraries Used
 
