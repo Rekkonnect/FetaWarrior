@@ -16,7 +16,7 @@ Permissions required:
 ## General Information
 
 - All commands have a default prefix of `=`.
-- `=help`: Shows all the available commands, or commands that match the given 
+- `=help`: Shows all the available commands, or commands that match the given query.
 - `=ping`: Gets an estimation of the current latency. It uses Discord.NET's Client.Latency property, which is not updated too frequently. Multiple consecutive commands might yield the same result due to that.
 - `=prefix`: Gets, sets or resets the prefix for the server. (Use `=help prefix` for more details).
 
@@ -48,3 +48,5 @@ Contributions are welcome, under the following constraints:
 ¯\\\_(ツ)\_/¯
 
 Ideally, you will want to test your code so that it does not cause issues. The official instance of the bot, including its secrets, are intentionally left unpublished, for obvious reasons.
+
+Note: a testing framework is currently under development, that will be hopefully merged into Discord.Net itself.
