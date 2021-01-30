@@ -165,6 +165,16 @@ namespace FetaWarrior.DiscordFunctionality
         }
         #endregion
 
+        #region Repository
+        [Command("repository")]
+        [Alias("repo")]
+        [Summary("Gets the link to this bot's source code repository on GitHub.")]
+        public async Task ShowRepositoryAsync()
+        {
+            await ReplyAsync("https://github.com/AlFasGD/FetaWarrior");
+        }
+        #endregion
+
         #region Ping
         [Command("ping")]
         [Summary("Gets the current ping.")]

@@ -108,14 +108,17 @@ namespace FetaWarrior.DiscordFunctionality
 
                 if (result is ExecuteResult executionResult)
                 {
+                    Console.WriteLine();
                     Console.WriteLine(executionResult.Exception);
                     Console.WriteLine();
                     Console.WriteLine(executionResult.Exception.StackTrace);
                     Console.WriteLine();
                     Console.WriteLine(executionResult.Exception.Message);
+                    Console.WriteLine();
                 }
                 else if (result is ParseResult parseResult)
                 {
+                    Console.WriteLine();
                     Console.WriteLine("Parameter Values");
                     if (parseResult.ParamValues != null)
                         foreach (var value in parseResult.ParamValues)
@@ -129,6 +132,7 @@ namespace FetaWarrior.DiscordFunctionality
 
                     Console.WriteLine();
                     Console.WriteLine($"Error Parameter: {parseResult.ErrorParameter}\n");
+                    Console.WriteLine();
                 }
             }
         }

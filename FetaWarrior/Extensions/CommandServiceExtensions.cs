@@ -14,14 +14,13 @@ namespace FetaWarrior.Extensions
         static CommandServiceExtensions()
         {
             var allTypes = typeof(TypeReader).Assembly.GetTypes();
-            var filtered = allTypes.Where(FilterTypeReaderType);
-            baseTypeReaders = filtered.ToArray();
+            baseTypeReaders = allTypes.Where(FilterTypeReaderType).ToArray();
+        }
 
-            bool FilterTypeReaderType(Type t)
-            {
-                return (t.Namespace?.StartsWith(typeof(UserTypeReader<>).Namespace) ?? false)
-                    && t.Name.EndsWith(typeof(UserTypeReader<>).Name[("User".Length)..]);
-            }
+        private static bool FilterTypeReaderType(Type t)
+        {
+            return (t.Namespace?.StartsWith(typeof(UserTypeReader<>).Namespace) == true)
+                && t.Name.EndsWith(typeof(UserTypeReader<>).Name[("User".Length)..]);
         }
 
         public static void AddTypeReader<TObject, TReader>(this CommandService service)
