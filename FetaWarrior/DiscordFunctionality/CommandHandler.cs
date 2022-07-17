@@ -3,6 +3,7 @@ using Discord.Rest;
 using Discord.WebSocket;
 using FetaWarrior.Configuration;
 using FetaWarrior.Extensions;
+using Garyon.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,6 +71,12 @@ public class CommandHandler : BaseHandler
         int? customArgumentPosition = null;
         if (socketMessage.HasMentionPrefix(BotClientManager.Instance.Client.CurrentUser, ref argumentPosition))
         {
+            // Skip all whitespace, not just the first
+            while (socketMessage.Content[argumentPosition].IsWhiteSpace())
+            {
+                argumentPosition++;
+            }
+
             customArgumentPosition = argumentPosition;
         }
         else
