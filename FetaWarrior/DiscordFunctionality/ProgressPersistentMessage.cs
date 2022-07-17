@@ -1,7 +1,5 @@
-﻿using Discord;
-using Discord.Rest;
+﻿using Discord.Rest;
 using Discord.WebSocket;
-using System;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;

@@ -2,31 +2,30 @@
 using System;
 using static System.Console;
 
-namespace FetaWarrior
+namespace FetaWarrior;
+
+public static class ConsoleLogging
 {
-    public static class ConsoleLogging
+    private static object writingLock = new object();
+
+    public static void WriteCurrentTime()
     {
-        private static object writingLock = new object();
+        ConsoleUtilities.WriteWithColor($"[{DateTime.Now:dd/MM/yyyy HH:mm:ss.ffff}] ", ConsoleColor.Yellow);
+    }
+    public static void WriteException(Exception e)
+    {
+        WriteLine($"Exception: {e.GetType()}\nMessage: {e.Message ?? "null"}\nStack trace:\n{e.StackTrace}");
+        WriteLine();
+        if (e.InnerException != null)
+            WriteException(e.InnerException);
+    }
 
-        public static void WriteCurrentTime()
+    public static void WriteEventWithCurrentTime(string message)
+    {
+        lock (writingLock)
         {
-            ConsoleUtilities.WriteWithColor($"[{DateTime.Now:dd/MM/yyyy HH:mm:ss.ffff}] ", ConsoleColor.Yellow);
-        }
-        public static void WriteException(Exception e)
-        {
-            WriteLine($"Exception: {e.GetType()}\nMessage: {e.Message ?? "null"}\nStack trace:\n{e.StackTrace}");
-            WriteLine();
-            if (e.InnerException != null)
-                WriteException(e.InnerException);
-        }
-
-        public static void WriteEventWithCurrentTime(string message)
-        {
-            lock (writingLock)
-            {
-                WriteCurrentTime();
-                WriteLine($"{message}\n");
-            }
+            WriteCurrentTime();
+            WriteLine($"{message}\n");
         }
     }
 }

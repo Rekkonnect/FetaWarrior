@@ -1,12 +1,11 @@
 ﻿using Discord.Commands;
 using System;
 
-namespace FetaWarrior.DiscordFunctionality.Attributes
+namespace FetaWarrior.DiscordFunctionality.Attributes;
+
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+public class RequireGuildContextAttribute : RequireContextAttribute
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public class RequireGuildContextAttribute : RequireContextAttribute
-    {
-        public RequireGuildContextAttribute()
-            : base(ContextType.Guild) { }
-    }
+    public RequireGuildContextAttribute()
+        : base(ContextType.Guild) { }
 }

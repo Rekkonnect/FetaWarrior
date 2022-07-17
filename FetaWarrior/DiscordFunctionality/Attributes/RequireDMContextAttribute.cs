@@ -1,12 +1,11 @@
 ﻿using Discord.Commands;
 using System;
 
-namespace FetaWarrior.DiscordFunctionality.Attributes
+namespace FetaWarrior.DiscordFunctionality.Attributes;
+
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+public class RequireDMContextAttribute : RequireContextAttribute
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public class RequireDMContextAttribute : RequireContextAttribute
-    {
-        public RequireDMContextAttribute()
-            : base(ContextType.DM) { }
-    }
+    public RequireDMContextAttribute()
+        : base(ContextType.DM) { }
 }
