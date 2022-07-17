@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality
 {
-    public class CommandHandler
+    public class CommandHandler : BaseHandler
     {
-        public static CommandHandler GlobalCommandHandler { get; private set; }
+        public static CommandHandler GlobalInstance { get; private set; }
 
-        public static IEnumerable<CommandInfo> AllAvailableCommands => GlobalCommandHandler.CommandService.Commands;
+        public static IEnumerable<CommandInfo> AllAvailableCommands => GlobalInstance.CommandService.Commands;
         public static IEnumerable<CommandInfo> AllPubliclyAvailableCommands => AllAvailableCommands.Where(c => !c.HasPrecondition<RequireOwnerAttribute>());
 
         public static DiscordSocketClient Client => BotClientManager.Instance.Client;
@@ -24,10 +24,14 @@ namespace FetaWarrior.DiscordFunctionality
         static CommandHandler()
         {
             // Nyun-nyun
-            GlobalCommandHandler = new(new());
+            GlobalInstance = new(new());
         }
 
         public CommandService CommandService { get; init; }
+
+        protected override string HandledObjectName => "command";
+
+        protected override Func<SocketMessage, Task> MessageReceivedEvents => HandleCommandAsync;
 
         public CommandHandler(CommandService service)
         {
@@ -38,7 +42,7 @@ namespace FetaWarrior.DiscordFunctionality
         #region Initialization
         private void Initialize()
         {
-            Task.WaitAll(Task.Run(InitializeCommandHandling));
+            InitializeCommandHandling().Wait();
         }
         private async Task InitializeCommandHandling()
         {
@@ -48,11 +52,6 @@ namespace FetaWarrior.DiscordFunctionality
         }
         #endregion
 
-        public void AddEvents(DiscordSocketClient client)
-        {
-            client.MessageReceived += HandleCommandAsync;
-        }
-
         #region Handlers
         private async Task HandleCommandAsync(SocketMessage message)
         {
@@ -60,23 +59,33 @@ namespace FetaWarrior.DiscordFunctionality
 
             var socketMessage = message as SocketUserMessage;
 
-            if (!socketMessage?.Author.IsHuman() ?? true)
+            if (socketMessage?.Author.IsHuman() != true)
                 return;
 
             var context = new TimestampedSocketCommandContext(Client, socketMessage, receivedTime);
 
             var prefix = BotConfig.Instance.GetPrefixForGuild(context.Guild);
 
-            if (!socketMessage.Content.StartsWith(prefix))
-                return;
+            int argumentPosition = 0;
+            int? customArgumentPosition = null;
+            if (socketMessage.HasMentionPrefix(BotClientManager.Instance.Client.CurrentUser, ref argumentPosition))
+            {
+                customArgumentPosition = argumentPosition;
+            }
+            else
+            {
+                if (!socketMessage.Content.StartsWith(prefix))
+                    return;
+            }
+            
+            LogHandledMessage(message);
 
-            ConsoleLogging.WriteEventWithCurrentTime($"{message.Author} sent a command:\n{socketMessage.Content}");
-
-            ExecuteCommandAsync(context, prefix);
+            ExecuteCommandAsync(context, prefix, customArgumentPosition);
         }
-        private async Task ExecuteCommandAsync(SocketCommandContext context, string prefix)
+        private async Task ExecuteCommandAsync(ICommandContext context, string prefix, int? customArgumentPosition)
         {
-            var result = await CommandService.ExecuteAsync(context, prefix.Length, null);
+            int argumentPosition = customArgumentPosition ?? prefix.Length;
+            var result = await CommandService.ExecuteAsync(context, argumentPosition, null);
 
             if (!result.IsSuccess)
             {
@@ -86,6 +95,11 @@ namespace FetaWarrior.DiscordFunctionality
                 switch (error)
                 {
                     case CommandError.UnknownCommand:
+                        break;
+
+                    case CommandError.BadArgCount:
+                    case CommandError.UnmetPrecondition:
+                        await context.Channel.SendMessageAsync($"{result.ErrorReason}");
                         break;
 
                     default:
@@ -106,6 +120,11 @@ namespace FetaWarrior.DiscordFunctionality
                         break;
                 }
 
+                if (result is PreconditionResult preconditionResult)
+                {
+                    //preconditionResult.
+                }
+
                 if (result is ExecuteResult executionResult)
                 {
                     Console.WriteLine();
@@ -120,15 +139,11 @@ namespace FetaWarrior.DiscordFunctionality
                 {
                     Console.WriteLine();
                     Console.WriteLine("Parameter Values");
-                    if (parseResult.ParamValues != null)
-                        foreach (var value in parseResult.ParamValues)
-                            Console.WriteLine(value);
+                    parseResult.ParamValues?.ForEachObject(Console.WriteLine);
 
                     Console.WriteLine();
                     Console.WriteLine("Argument Values");
-                    if (parseResult.ArgValues != null)
-                        foreach (var value in parseResult.ArgValues)
-                            Console.WriteLine(value);
+                    parseResult.ArgValues?.ForEachObject(Console.WriteLine);
 
                     Console.WriteLine();
                     Console.WriteLine($"Error Parameter: {parseResult.ErrorParameter}\n");

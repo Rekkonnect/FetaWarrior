@@ -3,12 +3,14 @@ using Garyon.DataStructures;
 using Garyon.Extensions;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace FetaWarrior.Configuration
 {
     // Probably rename to BotPrefixesConfig
     public class BotConfig
     {
+        // TODO: Use the database whenever it's setup
         private const string prefixesFilePath = "prefixes.txt";
         public const string DefaultPrefix = "=";
 
@@ -19,41 +21,67 @@ namespace FetaWarrior.Configuration
             Instance = new BotConfig();
         }
 
+        private readonly FlexibleDictionary<ulong, string> prefixes = new();
+
+        private readonly object writer = new();
+
         public BotConfig()
         {
             LoadInformation();
         }
 
-        private FlexibleDictionary<ulong, string> prefixes = new();
+        public string GetPrefixForChannel(IChannel commandChannel)
+        {
+            return GetPrefixForEntity(GetRecordedEntity(commandChannel));
+        }
+        public void SetPrefixForChannel(IChannel commandChannel, string prefix)
+        {
+            SetPrefixForEntity(GetRecordedEntity(commandChannel), prefix);
+        }
+        public void ResetPrefixForChannel(IChannel commandChannel)
+        {
+            ResetPrefixForEntity(GetRecordedEntity(commandChannel));
+        }
 
-        public string GetPrefixForGuild(IGuild guild) => GetPrefixForGuild(guild?.Id);
-        public string GetPrefixForGuild(ulong? guildID)
+        public string GetPrefixForGuild(IGuild guild) => GetPrefixForEntity(guild);
+        public void SetPrefixForGuild(IGuild guild, string prefix) => SetPrefixForEntity(guild, prefix);
+        public void ResetPrefixForGuild(IGuild guild) => ResetPrefixForEntity(guild);
+
+        private static ISnowflakeEntity GetRecordedEntity(IChannel commandChannel)
+        {
+            return commandChannel switch
+            {
+                IGuildChannel guildChannel => guildChannel.Guild,
+                _ => commandChannel
+            };
+        }
+
+        private string GetPrefixForEntity(ISnowflakeEntity entity) => GetPrefixForEntity(entity?.Id);
+        private string GetPrefixForEntity(ulong? snowflake)
         {
             // No need to save the information here because the default prefix is implied in every usage
             // Besides, if the default prefix changes, servers that are using the default prefix have to keep up
-            return prefixes[guildID ?? default] ?? DefaultPrefix;
+            return prefixes[snowflake ?? default] ?? DefaultPrefix;
         }
-        public void SetPrefixForGuild(IGuild guild, string prefix) => SetPrefixForGuild(guild.Id, prefix);
-        public void SetPrefixForGuild(ulong guildID, string prefix)
+        private void SetPrefixForEntity(ISnowflakeEntity entity, string prefix) => SetPrefixForEntity(entity.Id, prefix);
+        private void SetPrefixForEntity(ulong snowflake, string prefix)
         {
-            prefixes[guildID] = prefix;
+            prefixes[snowflake] = prefix;
             SaveInformation();
         }
-        public void ResetPrefixForGuild(IGuild guild) => ResetPrefixForGuild(guild.Id);
-        public void ResetPrefixForGuild(ulong guildID)
+        private void ResetPrefixForEntity(ISnowflakeEntity entity) => ResetPrefixForEntity(entity.Id);
+        private void ResetPrefixForEntity(ulong snowflake)
         {
-            prefixes.Remove(guildID);
+            prefixes.Remove(snowflake);
             SaveInformation();
         }
 
         public void SaveInformation()
         {
-            // Try writing the information to the database; in case multiple servers have their prefixes changed
-            try
+            lock (writer)
             {
                 File.WriteAllLinesAsync(prefixesFilePath, prefixes.Select(kvp => $"{kvp.Key}|{kvp.Value ?? DefaultPrefix}"));
             }
-            catch { }
         }
         public void LoadInformation()
         {

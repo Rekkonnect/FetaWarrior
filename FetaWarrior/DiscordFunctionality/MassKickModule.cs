@@ -12,8 +12,7 @@ namespace FetaWarrior.DiscordFunctionality
     [RequireBotPermission(GuildPermission.KickMembers)]
     public class MassKickModule : MassYeetUsersModuleBase
     {
-        protected override string YeetAction => "kick";
-        protected override string YeetActionPastParticiple => "kicked";
+        public override UserYeetingLexemes Lexemes => new UserKickingLexemes();
 
         #region Server Messages
         [Command("server message")]
@@ -73,6 +72,12 @@ namespace FetaWarrior.DiscordFunctionality
             var guild = await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
             var user = await guild.GetUserAsync(userID);
             await user.KickAsync(reason);
+        }
+
+        private sealed class UserKickingLexemes : UserYeetingLexemes
+        {
+            public override string ActionName => "kick";
+            public override string ActionPastParticiple => "kicked";
         }
     }
 }

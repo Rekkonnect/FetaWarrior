@@ -1,20 +1,23 @@
 ﻿using FetaWarrior.DiscordFunctionality;
 using System;
-using System.Threading.Tasks;
 using static System.Console;
 
-namespace FetaWarrior
+namespace FetaWarrior;
+
+public static class Program
 {
-    public static class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
-        {
-            Task.WaitAll(BotClientManager.Instance.InitializeLogin());
+        BotClientManager.Instance.InitializeLogin().Wait();
 
-            WriteLine("Press the ESC key to log out at any time.\n");
-            while (ReadKey(true).Key != ConsoleKey.Escape);
+        WriteLine("Press the ESC key to log out at any time.\n");
+        AwaitPressedKey(ConsoleKey.Escape);
 
-            Task.WaitAll(BotClientManager.Instance.Logout());
-        }
+        BotClientManager.Instance.Logout().Wait();
+    }
+
+    private static void AwaitPressedKey(ConsoleKey key)
+    {
+        while (ReadKey(true).Key != key);
     }
 }

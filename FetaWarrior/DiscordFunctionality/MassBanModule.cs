@@ -12,8 +12,7 @@ namespace FetaWarrior.DiscordFunctionality
     [RequireBotPermission(GuildPermission.BanMembers)]
     public class MassBanModule : MassYeetUsersModuleBase
     {
-        protected override string YeetAction => "ban";
-        protected override string YeetActionPastParticiple => "banned";
+        public override UserYeetingLexemes Lexemes => new MassBanningLexemes();
 
         #region Server Messages
         [Command("server message")]
@@ -69,5 +68,11 @@ namespace FetaWarrior.DiscordFunctionality
         #endregion
 
         protected override async Task YeetUser(ulong userID, string reason) => await Context.Guild.AddBanAsync(userID, 7, reason);
+
+        private sealed class MassBanningLexemes : UserYeetingLexemes
+        {
+            public override string ActionName => "ban";
+            public override string ActionPastParticiple => "banned";
+        }
     }
 }

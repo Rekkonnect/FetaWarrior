@@ -5,7 +5,6 @@ using FetaWarrior.Configuration;
 using System;
 using System.Threading.Tasks;
 using static FetaWarrior.ConsoleLogging;
-using static System.Console;
 
 namespace FetaWarrior.DiscordFunctionality
 {
@@ -13,6 +12,7 @@ namespace FetaWarrior.DiscordFunctionality
     {
         public const GuildPermission MinimumBotPermissions = GuildPermission.KickMembers
                                                            | GuildPermission.BanMembers
+                                                           | GuildPermission.ManageGuild
                                                            | GuildPermission.ViewChannel
                                                            | GuildPermission.SendMessages
                                                            | GuildPermission.ManageMessages
@@ -46,18 +46,19 @@ namespace FetaWarrior.DiscordFunctionality
         }
         private void InitializeNewSocketClient()
         {
-            Task.WaitAll(DisposeSocketClient());
+            DisposeSocketClient().Wait();
             // Nyun-nyun~~
             Client = new(new() { GatewayIntents = BotIntents });
 
             // Class coupling go brrr
-            CommandHandler.GlobalCommandHandler.AddEvents(Client);
+            CommandHandler.GlobalInstance.AddEvents(Client);
+            DMHandler.GlobalInstance.AddEvents(Client);
 
             Client.LoggedIn += AddSocketClientDisconnectionLoggers;
         }
         private void InitializeNewRestClient()
         {
-            Task.WaitAll(DisposeRestClient());
+            DisposeRestClient().Wait();
             RestClient = new();
 
             RestClient.LoggedIn += AddRestClientDisconnectionLoggers;
