@@ -26,6 +26,8 @@ Permissions required:
 - **Mass kick/ban members based on join dates**
 - **Delete messages in a specified channel within a specified range**
 - **Delete all messages sent in a specified channel**
+- **Remove bans for deleted users**
+- **Delete all announcement crosspost messages where the original announcement message was deleted**
   
 ## Planned Functionality
 
