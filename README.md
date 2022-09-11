@@ -7,6 +7,7 @@ This bot started as a quick solution for mass banning the thousands of accounts 
 Permissions required:
 - Kick Members
 - Ban Members
+- Manage Guild
 - View Channels
 - Send Messages
 - Manage Messages
