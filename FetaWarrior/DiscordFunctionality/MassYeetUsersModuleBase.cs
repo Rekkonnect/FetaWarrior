@@ -1,6 +1,8 @@
 ﻿using Discord;
 using Discord.Net;
+using FetaWarrior.DiscordFunctionality.Utilities;
 using FetaWarrior.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -8,17 +10,12 @@ using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
 
-public abstract class MassYeetUsersModuleBase : SocketModule
+public abstract class MassYeetUsersModuleBase : SocketInteractionModule
 {
     public abstract UserYeetingLexemes Lexemes { get; }
 
     #region Server Messages
-    protected async Task MassYeetFromServerMessages(ulong firstMessageID)
-    {
-        var lastMessageID = (await Context.Channel.GetLastMessageAsync()).Id;
-        await MassYeetFromServerMessages(firstMessageID, lastMessageID);
-    }
-    protected async Task MassYeetFromServerMessages(ulong firstMessageID, ulong lastMessageID)
+    protected async Task MassYeetFromServerMessages(ulong firstMessageID, ulong lastMessageID = Snowflakes.LargeSnowflake)
     {
         var guild = Context.Guild;
         var channel = guild.SystemChannel;
@@ -40,7 +37,7 @@ public abstract class MassYeetUsersModuleBase : SocketModule
     }
     #endregion
     #region Join Date
-    public async Task MassYeetFromJoinDate(ulong firstUserID)
+    private async Task<IGuildUser> GetLastJoinedUser()
     {
         var guild = Context.Guild;
 
@@ -51,6 +48,13 @@ public abstract class MassYeetUsersModuleBase : SocketModule
         foreach (var user in guild.Users)
             if (user.JoinedAt > lastJoinedUser.JoinedAt)
                 lastJoinedUser = user;
+
+        return lastJoinedUser;
+    }
+
+    public async Task MassYeetFromJoinDate(ulong firstUserID)
+    {
+        var lastJoinedUser = await GetLastJoinedUser();
 
         await MassYeetFromJoinDate(firstUserID, lastJoinedUser.Id);
     }
@@ -78,6 +82,25 @@ public abstract class MassYeetUsersModuleBase : SocketModule
             await persistentProgressMessage.SetContentAsync($"The last user ID {lastUserID} could not be found in this server.");
             return;
         }
+
+        var toBan = users.Where(u => u.JoinedAt >= firstUser.JoinedAt && u.JoinedAt <= lastUser.JoinedAt).Select(u => u.Id).ToArray();
+
+        await MassYeetWithProgress(toBan, persistentProgressMessage);
+    }
+
+    // Copy-pasted, but the above method is probably being yeeted anyway
+    public async Task MassYeetFromJoinDate(IGuildUser firstUser, IGuildUser lastUser)
+    {
+        var restGuild = await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
+
+        lastUser ??= await GetLastJoinedUser();
+
+        var originalProgressMessage = await Context.Channel.SendMessageAsync("Retrieving guild member list...");
+        var persistentProgressMessage = new PersistentMessage(originalProgressMessage);
+
+        var users = await restGuild.GetUsersAsync().FlattenAsync();
+
+        await persistentProgressMessage.SetContentAsync($"Discovering users to {Lexemes.ActionName}...");
 
         var toBan = users.Where(u => u.JoinedAt >= firstUser.JoinedAt && u.JoinedAt <= lastUser.JoinedAt).Select(u => u.Id).ToArray();
 
@@ -128,10 +151,29 @@ public abstract class MassYeetUsersModuleBase : SocketModule
 
         await MassYeetWithProgress(toBan, persistentProgressMessage);
     }
+
+    // Same as the other
+    public async Task MassYeetFromDefaultAvatar(IGuildUser firstUser, IGuildUser lastUser)
+    {
+        var restGuild = await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
+
+        var originalProgressMessage = await Context.Channel.SendMessageAsync("Retrieving guild member list...");
+        var persistentProgressMessage = new PersistentMessage(originalProgressMessage);
+
+        var users = await restGuild.GetUsersAsync().FlattenAsync();
+
+        await persistentProgressMessage.SetContentAsync($"Discovering users to {Lexemes.ActionName}...");
+
+        var toBan = users.Where(u => u.GetAvatarUrl() is null && u.JoinedAt >= firstUser.JoinedAt && u.JoinedAt <= lastUser.JoinedAt).Select(u => u.Id).ToArray();
+
+        await MassYeetWithProgress(toBan, persistentProgressMessage);
+    }
     #endregion
 
+    // TODO: Change `ulong userID` to `IGuildUser user`
     protected abstract Task YeetUser(ulong userID, string reason);
 
+    // TODO: Change to accept ICollection<IGuildUser>
     protected async Task MassYeetWithProgress(ICollection<ulong> toYeet, PersistentMessage persistentProgressMessage)
     {
         int yeetedUserCount = 0;
@@ -162,7 +204,12 @@ public abstract class MassYeetUsersModuleBase : SocketModule
             yeetedUserCount++;
         }
 
+        // THIS SUGGESTION IS A FALSE POSITIVE; This matters for breaking the async loop
+        // Though in a fairer note, this might be a general suggestion to avoid this practice
+#pragma warning disable IDE0059
         yeetingComplete = true;
+#pragma warning restore IDE0059
+
         await progressUpdatingTask;
 
         async Task UpdateYeetingProgress()

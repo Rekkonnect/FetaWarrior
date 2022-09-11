@@ -1,4 +1,6 @@
-﻿using static System.IO.File;
+﻿using Discord;
+using Discord.Net.Rest;
+using static System.IO.File;
 
 namespace FetaWarrior.DiscordFunctionality;
 
@@ -12,9 +14,11 @@ public class BotCredentials
         Instance = ReadFromFileLines(ReadAllLines("secrets.txt"));
     }
 
-    public ulong ClientID { get; private init; }
-    public string ClientSecret { get; private init; }
-    public string BotToken { get; private init; }
+    public ulong ClientID { get; set; }
+    public string ClientSecret { get; set; }
+    public string BotToken { get; set; }
+
+    public TokenType TokenType { get; set; } = TokenType.Bot;
 
     private static BotCredentials ReadFromFileLines(string[] lines)
     {

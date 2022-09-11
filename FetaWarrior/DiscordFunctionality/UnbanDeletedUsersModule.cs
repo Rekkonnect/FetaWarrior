@@ -1,6 +1,6 @@
 ﻿using Discord;
-using Discord.Commands;
-using FetaWarrior.DiscordFunctionality.Attributes;
+using Discord.Interactions;
+using FetaWarrior.DiscordFunctionality.Slash.Attributes;
 using FetaWarrior.Extensions;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,12 +12,9 @@ namespace FetaWarrior.DiscordFunctionality;
 [RequireBotPermission(GuildPermission.ManageGuild)]
 public class UnbanDeletedUsersModule : MassYeetUsersModuleBase
 {
-    public override UserYeetingLexemes Lexemes => new MassUnbanningLexemes();
+    public override UserYeetingLexemes Lexemes => MassUnbanningLexemes.Instance;
 
-    [Command("unban deleted")]
-    [Alias("unban del", "unband")]
-    [Summary("Revokes the ban for all banned accounts that have been deleted. Can be used to reduce clutter in the ban list.")]
-    [Remarks(@"The deleted user detection may not be entirely accurate; it depends on the username of the deleted account matching the ""Deleted User xxxxxxxx"" pattern.")]
+    [SlashCommand("unban-deleted", "Revokes the ban for all banned accounts that have been deleted as deleted.")]
     public async Task UnbanAllDeleted()
     {
         var guild = Context.Guild;
@@ -39,6 +36,9 @@ public class UnbanDeletedUsersModule : MassYeetUsersModuleBase
 
     private sealed class MassUnbanningLexemes : UserYeetingLexemes
     {
+        public static MassUnbanningLexemes Instance { get; } = new();
+        private MassUnbanningLexemes() { }
+
         public override string ActionName => "unban";
         public override string ActionPastParticiple => "unbanned";
     }

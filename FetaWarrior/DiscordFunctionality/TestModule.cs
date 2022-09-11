@@ -1,22 +1,23 @@
 ﻿// Uncomment the following line to enable test commands within this module file
-//#define TEST
+#define TEST
 
 using Discord;
-using FetaWarrior.DiscordFunctionality.Attributes;
+using Discord.Interactions;
+using FetaWarrior.DiscordFunctionality.Slash.Attributes;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
 
-public class TestModule : SocketModule
+public class TestModule : SocketInteractionModule
 {
 #if TEST
-    [Command("testadmin")]
+    [SlashCommand("test-admin", "A very private test that you should not be able to see.")]
 #endif
     [RequireGuildContext]
     [RequireUserAdminPermission]
     public async Task TestAdminAsync()
     {
-        var permissions = Context.Guild.GetUser(Context.Message.Author.Id).GuildPermissions;
+        var permissions = Context.Guild.GetUser(Context.Interaction.User.Id).GuildPermissions;
         bool isAdmin = permissions.Has(GuildPermission.Administrator);
         await ReplyAsync(isAdmin switch
         {

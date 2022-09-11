@@ -1,5 +1,6 @@
 ﻿using Discord.Rest;
 using Discord.WebSocket;
+using FetaWarrior.Utilities;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;

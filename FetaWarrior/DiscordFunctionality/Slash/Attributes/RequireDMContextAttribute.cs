@@ -1,9 +1,8 @@
 ﻿using Discord.Commands;
 using System;
 
-namespace FetaWarrior.DiscordFunctionality.Attributes;
+namespace FetaWarrior.DiscordFunctionality.Slash.Attributes;
 
-[Obsolete("Slash commands")]
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
 public class RequireDMContextAttribute : RequireContextAttribute
 {

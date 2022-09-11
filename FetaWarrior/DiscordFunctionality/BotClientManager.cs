@@ -1,8 +1,10 @@
 ﻿using Discord;
+using Discord.Interactions;
 using Discord.Rest;
 using Discord.WebSocket;
-using FetaWarrior.Configuration;
+using Garyon.Functions;
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using static FetaWarrior.ConsoleLogging;
 
@@ -34,9 +36,33 @@ public class BotClientManager
     public DiscordSocketClient Client { get; private set; }
     public DiscordRestClient RestClient { get; private set; }
 
+    // Only store an interaction service for the socket client
+    public InteractionService InteractionService { get; private set; }
+
     private BotClientManager()
     {
         StartActivityLoop();
+    }
+
+    private async Task RegisterSlashCommands()
+    {
+        try
+        {
+            InteractionService = new InteractionService(Client);
+
+            await InteractionService.AddModulesAsync(Assembly.GetEntryAssembly(), null);
+#if DEBUG
+            // Yes I have a private server to test the bot on
+            const ulong testGuildID = 794554235970125855;
+            await InteractionService.RegisterCommandsToGuildAsync(testGuildID);
+#else
+            await InteractionService.RegisterCommandsGloballyAsync();
+#endif
+        }
+        catch (Exception e)
+        {
+            ConsoleUtilities.WriteExceptionInfo(e);
+        }
     }
 
     private void InitializeNewClients()
@@ -51,10 +77,11 @@ public class BotClientManager
         Client = new(new() { GatewayIntents = BotIntents });
 
         // Class coupling go brrr
-        CommandHandler.GlobalInstance.AddEvents(Client);
+        //CommandHandler.GlobalInstance.AddEvents(Client);
         DMHandler.GlobalInstance.AddEvents(Client);
 
-        Client.LoggedIn += AddSocketClientDisconnectionLoggers;
+        Client.LoggedIn += OnSocketClientLoggedIn;
+        Client.Ready += OnSocketClientReady;
     }
     private void InitializeNewRestClient()
     {
@@ -64,7 +91,16 @@ public class BotClientManager
         RestClient.LoggedIn += AddRestClientDisconnectionLoggers;
     }
 
-    private async Task AddSocketClientDisconnectionLoggers()
+    private async Task OnSocketClientReady()
+    {
+        await RegisterSlashCommands();
+    }
+    private async Task OnSocketClientLoggedIn()
+    {
+        AddSocketClientDisconnectionLoggers();
+    }
+
+    private void AddSocketClientDisconnectionLoggers()
     {
         Client.Disconnected += LogSocketClientDisconnection;
         Client.LoggedOut += LogSocketClientDisconnection;
@@ -116,17 +152,17 @@ public class BotClientManager
 
     public async Task InitializeLogin()
     {
-        Task.WaitAll(LoginSocketClient(), LoginRestClient());
+        await Task.WhenAll(LoginSocketClient(), LoginRestClient());
     }
     public async Task Logout()
     {
-        Task.WaitAll(UnsubscribeLogoutSocketClient(), UnsubscribeLogoutRestClient());
+        await Task.WhenAll(UnsubscribeLogoutSocketClient(), UnsubscribeLogoutRestClient());
     }
 
     private async Task LoginSocketClient()
     {
         InitializeNewSocketClient();
-        await Client.LoginAsync(TokenType.Bot, BotCredentials.Instance.BotToken);
+        await Client.LoginAsync(BotCredentials.Instance);
         await Client.StartAsync();
 
         WriteEventWithCurrentTime("Socket client logged in");
@@ -134,7 +170,7 @@ public class BotClientManager
     private async Task LoginRestClient()
     {
         InitializeNewRestClient();
-        await RestClient.LoginAsync(TokenType.Bot, BotCredentials.Instance.BotToken);
+        await RestClient.LoginAsync(BotCredentials.Instance);
 
         WriteEventWithCurrentTime("REST client logged in");
     }
@@ -159,7 +195,7 @@ public class BotClientManager
         WriteEventWithCurrentTime("REST client logged out");
     }
 
-    #region Disconnection Loggers
+#region Disconnection Loggers
     private async Task LogSocketClientDisconnection(Exception e)
     {
         WriteEventWithCurrentTime("Socket client disconnected");
@@ -173,14 +209,19 @@ public class BotClientManager
     {
         WriteEventWithCurrentTime("REST client disconnected");
     }
-    #endregion
+#endregion
 
     private void StartActivityLoop()
     {
         var lines = new string[]
         {
-            $"Default Prefix: \"{BotConfig.DefaultPrefix}\"",
-            $"Help Command: \"{BotConfig.DefaultPrefix}help\"",
+            // These are becoming obsolete
+            /*
+            $"Default Prefix: \"{BotPrefixesConfig.DefaultPrefix}\"",
+            $"Help Command: \"{BotPrefixesConfig.DefaultPrefix}help\"",
+            */
+
+            $"Now supporting slash commands!",
             $"Servers: {{ServerCount}}",
         };
 
@@ -192,7 +233,7 @@ public class BotClientManager
 
             while (true)
             {
-                if (Client?.ConnectionState == ConnectionState.Connected)
+                if (Client?.ConnectionState is ConnectionState.Connected)
                 {
                     var line = lines[index].Replace($"{{ServerCount}}", $"{Client.Guilds.Count}");
                     await Client.SetActivityAsync(new Game(line, ActivityType.Playing, details: line));

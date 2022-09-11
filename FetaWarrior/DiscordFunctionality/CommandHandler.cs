@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
 
+[Obsolete("Slash commands")]
 public class CommandHandler : BaseHandler
 {
     public static CommandHandler GlobalInstance { get; private set; }
@@ -47,7 +48,7 @@ public class CommandHandler : BaseHandler
     }
     private async Task InitializeCommandHandling()
     {
-        var thisAssembly = Assembly.GetExecutingAssembly();
+        var thisAssembly = Assembly.GetEntryAssembly();
         CommandService.AddTypeReaders(thisAssembly);
         await CommandService.AddModulesAsync(thisAssembly, null);
     }
@@ -65,7 +66,7 @@ public class CommandHandler : BaseHandler
 
         var context = new TimestampedSocketCommandContext(Client, socketMessage, receivedTime);
 
-        var prefix = BotConfig.Instance.GetPrefixForGuild(context.Guild);
+        var prefix = BotPrefixesConfig.Instance.GetPrefixForGuild(context.Guild);
 
         int argumentPosition = 0;
         int? customArgumentPosition = null;

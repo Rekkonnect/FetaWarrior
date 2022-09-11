@@ -2,10 +2,12 @@
 using Discord.Commands;
 using FetaWarrior.Configuration;
 using FetaWarrior.Extensions;
+using System;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
 
+[Obsolete("The bot no longer supports messages with custom prefixes, as we're migrating to Discord slash commands")]
 public class BotConfigModule : SocketModule
 {
     [Command("prefix get")]
@@ -13,7 +15,7 @@ public class BotConfigModule : SocketModule
     [Summary("Displays the current prefix for this bot on this server.")]
     public async Task DisplayCurrentPrefixAsync()
     {
-        await Context.Channel.SendMessageAsync($"The current prefix for this server is {BotConfig.Instance.GetPrefixForChannel(Context.Channel).ToNonFormattableText()}");
+        await Context.Channel.SendMessageAsync($"The current prefix for this server is {BotPrefixesConfig.Instance.GetPrefixForChannel(Context.Channel).ToNonFormattableText()}");
     }
 
     [Command("prefix reset")]
@@ -22,8 +24,8 @@ public class BotConfigModule : SocketModule
     [RequireUserPermission(GuildPermission.ManageGuild)]
     public async Task ResetPrefixAsync()
     {
-        BotConfig.Instance.ResetPrefixForChannel(Context.Channel);
-        await Context.Channel.SendMessageAsync($"Reset the current prefix for this server to {BotConfig.DefaultPrefix.ToNonFormattableText()}");
+        BotPrefixesConfig.Instance.ResetPrefixForChannel(Context.Channel);
+        await Context.Channel.SendMessageAsync($"Reset the current prefix for this server to {BotPrefixesConfig.DefaultPrefix.ToNonFormattableText()}");
     }
 
     [Command("prefix set")]
@@ -36,7 +38,7 @@ public class BotConfigModule : SocketModule
         string newPrefix
     )
     {
-        BotConfig.Instance.SetPrefixForChannel(Context.Channel, newPrefix);
+        BotPrefixesConfig.Instance.SetPrefixForChannel(Context.Channel, newPrefix);
         await Context.Channel.SendMessageAsync($"Changed the current prefix for this server to {newPrefix.ToNonFormattableText()}");
     }
 }

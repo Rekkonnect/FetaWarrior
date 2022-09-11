@@ -4,6 +4,7 @@ using System;
 
 namespace FetaWarrior.DiscordFunctionality;
 
+[Obsolete("This is probably never making it anyway")]
 public class TimestampedSocketCommandContext : SocketCommandContext
 {
     public DateTime CommandReceivedTime { get; }

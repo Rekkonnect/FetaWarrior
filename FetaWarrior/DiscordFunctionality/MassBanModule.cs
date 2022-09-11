@@ -1,69 +1,43 @@
 ﻿using Discord;
-using Discord.Commands;
-using FetaWarrior.DiscordFunctionality.Attributes;
+using Discord.Interactions;
+using FetaWarrior.DiscordFunctionality.Slash.Attributes;
+using FetaWarrior.DiscordFunctionality.Utilities;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
 
-[Group("massban")]
-[Summary("Mass bans all users that suit a specified filter.")]
+[Group("massban", "Mass bans all users that suit a specified filter.")]
 [RequireGuildContext]
 [RequireUserPermission(GuildPermission.BanMembers)]
 [RequireBotPermission(GuildPermission.BanMembers)]
 public class MassBanModule : MassYeetUsersModuleBase
 {
-    public override UserYeetingLexemes Lexemes => new MassBanningLexemes();
+    public override UserYeetingLexemes Lexemes => MassBanningLexemes.Instance;
 
     #region Server Messages
-    [Command("server message")]
-    [Alias("sm", "server messages", "servermessage", "servermessages")]
-    [Summary("Mass bans all users that are greeted with server messages after the given server message. This means that all server messages that greet new members after the specified message, **including** the specified message, will result in the greeted members' **ban**.")]
+    [SlashCommand("server-message", "Mass ban all users that are greeted with server messages within a range.")]
     public async Task MassBanFromServerMessages
     (
-        [Summary("The ID of the first server message, inclusive.")]
-        ulong firstMessageID
-    )
-    {
-        await MassYeetFromServerMessages(firstMessageID);
-    }
-    [Command("server message")]
-    [Alias("sm", "server messages", "servermessage", "servermessages")]
-    [Summary("Mass bans all users that are greeted with server messages within the given server message range. This means that all server messages that greet new members within the specified range, **including** the specified messages, will result in the greeted members' **ban**.")]
-    public async Task MassBanFromServerMessages
-    (
-        [Summary("The ID of the first server message, inclusive.")]
+        [Summary(description: "The ID of the first server message, inclusive.")]
         ulong firstMessageID,
-        [Summary("The ID of the last server message, inclusive.")]
-        ulong lastMessageID
+        [Summary(description: "The ID of the last server message, inclusive.")]
+        ulong lastMessageID = Snowflakes.LargeSnowflake
     )
     {
         await MassYeetFromServerMessages(firstMessageID, lastMessageID);
     }
     #endregion
     #region Join Date
-    [Command("join date")]
-    [Alias("jd", "joindate")]
-    [Summary("Mass bans all users that joined after a user's join date. This means that all users that joined after the first specified user, **including** the user that was specified as first, will be **banned**.")]
+    [SlashCommand("join-date", "Mass ban all users that joined within the range of two users' join dates.")]
     public async Task MassBanFromJoinDate
     (
-        [Summary("The ID of the first user, inclusive.")]
-        ulong firstUserID
+        [Summary(description: "The user whose join date is the starting point, inclusive.")]
+        IGuildUser firstUser,
+        [Summary(description: "The user whose join date is the ending point, inclusive. Omitting implies up until now.")]
+        IGuildUser lastUser = null
     )
     {
-        await MassYeetFromJoinDate(firstUserID);
-    }
-    [Command("join date")]
-    [Alias("jd", "joindate")]
-    [Summary("Mass bans all users that joined within the range specified by two users' join dates. This means that all users that joined after the first specified user, and before the last specified user, **including** the users that were specified as first and last, will be **banned**.")]
-    public async Task MassBanFromJoinDate
-    (
-        [Summary("The ID of the first user, inclusive.")]
-        ulong firstUserID,
-        [Summary("The ID of the last user, inclusive.")]
-        ulong lastUserID
-    )
-    {
-        await MassYeetFromJoinDate(firstUserID, lastUserID);
+        await MassYeetFromJoinDate(firstUser, lastUser);
     }
     #endregion
 
@@ -71,6 +45,9 @@ public class MassBanModule : MassYeetUsersModuleBase
 
     private sealed class MassBanningLexemes : UserYeetingLexemes
     {
+        public static MassBanningLexemes Instance { get; } = new();
+        private MassBanningLexemes() { }
+
         public override string ActionName => "ban";
         public override string ActionPastParticiple => "banned";
     }

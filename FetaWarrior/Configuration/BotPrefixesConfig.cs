@@ -6,25 +6,27 @@ using System.Linq;
 
 namespace FetaWarrior.Configuration;
 
+// TODO: Remove this once the slash command migration is over
+
 // Probably rename to BotPrefixesConfig
-public class BotConfig
+public class BotPrefixesConfig
 {
     // TODO: Use the database whenever it's setup
     private const string prefixesFilePath = "prefixes.txt";
     public const string DefaultPrefix = "=";
 
-    public static BotConfig Instance { get; }
+    public static BotPrefixesConfig Instance { get; }
 
-    static BotConfig()
+    static BotPrefixesConfig()
     {
-        Instance = new BotConfig();
+        Instance = new BotPrefixesConfig();
     }
 
     private readonly FlexibleDictionary<ulong, string> prefixes = new();
 
     private readonly object writer = new();
 
-    public BotConfig()
+    public BotPrefixesConfig()
     {
         LoadInformation();
     }

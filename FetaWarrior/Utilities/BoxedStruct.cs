@@ -1,10 +1,10 @@
-﻿namespace FetaWarrior.DiscordFunctionality;
+﻿namespace FetaWarrior.Utilities;
 
 public sealed class BoxedStruct<T>
     where T : struct
 {
     public T Value { get; set; }
-    
+
     public BoxedStruct() { }
     public BoxedStruct(T value)
     {

@@ -1,5 +1,6 @@
 ﻿namespace FetaWarrior.DiscordFunctionality;
 
+// TODO: Use absrtact statics?
 public interface IActionLexemes
 {
     public abstract string ActionName { get; }
