@@ -1,7 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
 using FetaWarrior.DiscordFunctionality.Slash.Attributes;
-using FetaWarrior.DiscordFunctionality.Utilities;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
@@ -19,9 +18,9 @@ public class MassKickModule : MassYeetUsersModuleBase
     public async Task MassKickFromServerMessages
     (
         [Summary(description: "The ID of the first server message, inclusive.")]
-        ulong firstMessageID,
+        Snowflake firstMessageID,
         [Summary(description: "The ID of the last server message, inclusive.")]
-        ulong lastMessageID = Snowflakes.LargeSnowflake
+        Snowflake lastMessageID = default
     )
     {
         await MassYeetFromServerMessages(firstMessageID, lastMessageID);

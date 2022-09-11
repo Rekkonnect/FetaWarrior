@@ -1,6 +1,5 @@
 ﻿using Discord;
 using Discord.Net;
-using FetaWarrior.DiscordFunctionality.Utilities;
 using FetaWarrior.Extensions;
 using System;
 using System.Collections.Generic;
@@ -15,8 +14,11 @@ public abstract class MassYeetUsersModuleBase : SocketInteractionModule
     public abstract UserYeetingLexemes Lexemes { get; }
 
     #region Server Messages
-    protected async Task MassYeetFromServerMessages(ulong firstMessageID, ulong lastMessageID = Snowflakes.LargeSnowflake)
+    protected async Task MassYeetFromServerMessages(Snowflake firstMessageID, Snowflake lastMessageID)
     {
+        if (lastMessageID.Value is 0)
+            lastMessageID = Snowflake.LargeSnowflake;
+
         var guild = Context.Guild;
         var channel = guild.SystemChannel;
 

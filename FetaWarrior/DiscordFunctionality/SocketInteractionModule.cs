@@ -28,7 +28,7 @@ public abstract class SocketInteractionModule : InteractionModuleBase<SocketInte
     /// <param name="firstMessageID">The first message ID.</param>
     /// <param name="lastMessageID">The last message ID.</param>
     /// <returns><see langword="true"/> if the message IDs are valid, <see langword="false"/> otherwise.</returns>
-    protected async Task<bool> ValidateMessageIDs(ulong firstMessageID, ulong lastMessageID)
+    protected async Task<bool> ValidateMessageIDs(Snowflake firstMessageID, Snowflake lastMessageID)
     {
         if (lastMessageID == 0)
         {

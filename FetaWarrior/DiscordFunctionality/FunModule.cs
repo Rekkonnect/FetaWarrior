@@ -16,11 +16,11 @@ public class FunModule : SocketInteractionModule
     {
         if (user is null)
         {
-            await Context.Channel.SendMessageAsync($"Huggie with **{AuthorNicknameOrUsername}** :heart:");
+            await RespondAsync($"Huggie with **{AuthorNicknameOrUsername}** :heart:");
         }
         else
         {
-            await Context.Channel.SendMessageAsync($"{user.Mention}, **{AuthorNicknameOrUsername}** hugs you :heart:");
+            await RespondAsync($"{user.Mention}, **{AuthorNicknameOrUsername}** hugs you :heart:");
         }
     }
     #endregion

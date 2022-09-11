@@ -12,8 +12,6 @@ using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
 
-using static Utilities.Snowflakes;
-
 [Group("delete", "Deletes messages based on specified conditions.")]
 [RequireGuildContext]
 [RequireUserPermission(ChannelPermission.ManageMessages, Group = "User")]
@@ -28,13 +26,16 @@ public class MessageDeletionModule : SocketInteractionModule
         [Summary(description: "The channel whose messages to delete, defaulting to this channel.")]
         ITextChannel textChannel = null,
         [Summary(description: "The ID of the first message that will be deleted, **inclusive**.")]
-        ulong firstMessageID = 0,
+        Snowflake firstMessageID = default,
         [Summary(description: "The ID of the last message that will be deleted, **inclusive**.")]
-        ulong lastMessageID = LargeSnowflake
+        Snowflake lastMessageID = default
     )
     {
         var contextChannel = Context.Channel;
         textChannel ??= contextChannel as ITextChannel;
+
+        if (lastMessageID == 0)
+            lastMessageID = Snowflake.LargeSnowflake;
 
         bool valid = await ValidateMessageIDs(firstMessageID, lastMessageID);
         if (!valid)
@@ -72,20 +73,22 @@ public class MessageDeletionModule : SocketInteractionModule
         private const string daCommandRemarkStatement0 = $@"The messages are filtered to dates not prior to {earliestAnnouncementDateString}, which the current estimate of the earliest announcement messages.";
         private const string daCommandRemarkStatement1 = $@"Please report messages uncaught by this filter.";
         private const string daCommandRemarkStatement2 = $@"Search for ""[Original Message Deleted]"" after every operation to guarantee no leftovers.";
-        private const string daCommandRemark =
-    $@"{daCommandRemarkStatement0} {daCommandRemarkStatement1} {daCommandRemarkStatement2}";
+        private const string daCommandRemark = $@"{daCommandRemarkStatement0} {daCommandRemarkStatement1} {daCommandRemarkStatement2}";
 
         // TODO: Build indexing (database moment)
         [SlashCommand("all-channels", "Delete all received announcement messages that were deleted from the original source.")]
         public async Task DeleteServerWideDeletedAnnouncementMessages
         (
             [Summary(description: "The ID of the first announcement message that will be deleted, **inclusive**.")]
-            ulong firstMessageID = 0,
+            Snowflake firstMessageID = default,
             [Summary(description: "The ID of the last announcement message that will be deleted, **inclusive**.")]
-            ulong lastMessageID = LargeSnowflake
+            Snowflake lastMessageID = default
         )
         {
             var contextChannel = Context.Channel;
+
+            if (lastMessageID == 0)
+                lastMessageID = Snowflake.LargeSnowflake;
 
             bool valid = await ValidateMessageIDs(firstMessageID, lastMessageID);
             if (!valid)
@@ -137,13 +140,16 @@ public class MessageDeletionModule : SocketInteractionModule
             [Summary(description: "The channel on which the the messages to delete are contained.")]
             ITextChannel textChannel = null,
             [Summary(description: "The ID of the first announcement message that will be deleted, **inclusive**.")]
-            ulong firstMessageID = 0,
+            Snowflake firstMessageID = default,
             [Summary(description: "The ID of the last announcement message that will be deleted, **inclusive**.")]
-            ulong lastMessageID = LargeSnowflake
+            Snowflake lastMessageID = default
         )
         {
             var contextChannel = Context.Channel;
             textChannel ??= contextChannel as ITextChannel;
+
+            if (lastMessageID == 0)
+                lastMessageID = Snowflake.LargeSnowflake;
 
             bool valid = await ValidateMessageIDs(firstMessageID, lastMessageID);
             if (!valid)

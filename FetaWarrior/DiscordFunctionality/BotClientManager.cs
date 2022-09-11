@@ -2,7 +2,9 @@
 using Discord.Interactions;
 using Discord.Rest;
 using Discord.WebSocket;
+using FetaWarrior.Extensions;
 using Garyon.Functions;
+using Microsoft.VisualBasic;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -12,6 +14,7 @@ namespace FetaWarrior.DiscordFunctionality;
 
 public class BotClientManager
 {
+    // ManageGuild for unbanning deleted users
     public const GuildPermission MinimumBotPermissions = GuildPermission.KickMembers
                                                        | GuildPermission.BanMembers
                                                        | GuildPermission.ManageGuild
@@ -34,7 +37,8 @@ public class BotClientManager
     }
 
     public DiscordSocketClient Client { get; private set; }
-    public DiscordRestClient RestClient { get; private set; }
+    public DiscordRestClient RestClient => Client.Rest;
+    //public DiscordRestClient RestClient { get; private set; }
 
     // Only store an interaction service for the socket client
     public InteractionService InteractionService { get; private set; }
@@ -48,9 +52,11 @@ public class BotClientManager
     {
         try
         {
-            InteractionService = new InteractionService(Client);
+            var entryAssembly = Assembly.GetEntryAssembly();
+            InteractionService = new InteractionService(RestClient);
+            InteractionService.AddTypeConverters(entryAssembly);
 
-            await InteractionService.AddModulesAsync(Assembly.GetEntryAssembly(), null);
+            await InteractionService.AddModulesAsync(entryAssembly, null);
 #if DEBUG
             // Yes I have a private server to test the bot on
             const ulong testGuildID = 794554235970125855;
@@ -68,7 +74,7 @@ public class BotClientManager
     private void InitializeNewClients()
     {
         InitializeNewSocketClient();
-        InitializeNewRestClient();
+        //InitializeNewRestClient();
     }
     private void InitializeNewSocketClient()
     {
@@ -77,7 +83,7 @@ public class BotClientManager
         Client = new(new() { GatewayIntents = BotIntents });
 
         // Class coupling go brrr
-        //CommandHandler.GlobalInstance.AddEvents(Client);
+        InteractionCommandHandler.GlobalInstance.AddEvents(Client);
         DMHandler.GlobalInstance.AddEvents(Client);
 
         Client.LoggedIn += OnSocketClientLoggedIn;
@@ -86,7 +92,7 @@ public class BotClientManager
     private void InitializeNewRestClient()
     {
         DisposeRestClient().Wait();
-        RestClient = new();
+        //RestClient = new();
 
         RestClient.LoggedIn += AddRestClientDisconnectionLoggers;
     }
@@ -152,10 +158,16 @@ public class BotClientManager
 
     public async Task InitializeLogin()
     {
+        await LoginSocketClient();
+        return;
+
         await Task.WhenAll(LoginSocketClient(), LoginRestClient());
     }
     public async Task Logout()
     {
+        await UnsubscribeLogoutSocketClient();
+        return;
+
         await Task.WhenAll(UnsubscribeLogoutSocketClient(), UnsubscribeLogoutRestClient());
     }
 
