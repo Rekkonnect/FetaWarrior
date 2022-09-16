@@ -1,6 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
-using FetaWarrior.DiscordFunctionality.Slash.Attributes;
+using FetaWarrior.DiscordFunctionality.Interactions.Attributes;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;

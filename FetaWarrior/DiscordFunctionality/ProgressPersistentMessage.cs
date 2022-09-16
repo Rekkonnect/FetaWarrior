@@ -1,4 +1,4 @@
-﻿using Discord.Rest;
+﻿using Discord;
 using Discord.WebSocket;
 using FetaWarrior.Utilities;
 using System.Threading.Tasks;
@@ -11,10 +11,12 @@ public abstract class ProgressPersistentMessage : InitializablePersistentMessage
 
     public abstract IActionLexemes Lexemes { get; }
 
-    protected ProgressPersistentMessage(RestUserMessage currentMessage)
+    protected ProgressPersistentMessage(IUserMessage currentMessage)
         : base(currentMessage) { }
     protected ProgressPersistentMessage(ISocketMessageChannel channel)
         : base(channel) { }
+    protected ProgressPersistentMessage(IDiscordInteraction interaction)
+        : base(interaction) { }
 
     protected override string GetInitializationMessageContent()
     {

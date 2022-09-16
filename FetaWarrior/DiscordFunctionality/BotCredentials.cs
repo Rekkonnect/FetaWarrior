@@ -1,5 +1,4 @@
 ﻿using Discord;
-using Discord.Net.Rest;
 using static System.IO.File;
 
 namespace FetaWarrior.DiscordFunctionality;

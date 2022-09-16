@@ -1,6 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
-using FetaWarrior.DiscordFunctionality.Slash.Attributes;
+using FetaWarrior.DiscordFunctionality.Interactions.Attributes;
 using FetaWarrior.Extensions;
 using FetaWarrior.Utilities;
 using Garyon.Extensions;
@@ -21,7 +21,7 @@ namespace FetaWarrior.DiscordFunctionality;
 public class MessageDeletionModule : SocketInteractionModule
 {
     [SlashCommand("range", "Deletes a range of messages in a channel.")]
-    public async Task DeleteAllMessages
+    public async Task DeleteRange
     (
         [Summary(description: "The channel whose messages to delete, defaulting to this channel.")]
         ITextChannel textChannel = null,
@@ -45,8 +45,9 @@ public class MessageDeletionModule : SocketInteractionModule
         if (!valid)
             return;
 
-        var progressMessageTimestamp = Context.Interaction.CreatedAt;
-        var persistentProgressMessage = new MessageDeletingProgressPersistentMessage(contextChannel);
+        var progressMessageTimestamp = Context.Interaction.CreatedAt;        
+        await Context.Interaction.RespondAsync("Discovering the messages to delete.");
+        var persistentProgressMessage = new MessageDeletingProgressPersistentMessage(Context.Interaction);
 
         var foundMessages = await DiscoverMessagesAsync(DiscoverFilteredMessagesAsync, persistentProgressMessage);
 
@@ -55,7 +56,7 @@ public class MessageDeletionModule : SocketInteractionModule
             return await textChannel.GetMessageRangeAsync(firstMessageID, lastMessageID, value => persistentProgressMessage.Progress.Target = value);
         }
 
-        var updateTask = persistentProgressMessage.KeepUpdatingProgressMessage(750, true, 5000);
+        var updateTask = persistentProgressMessage.KeepUpdatingProgressMessage(750, true);
         
         await textChannel.DeleteFoundMessages(foundMessages, progressMessageTimestamp.UtcDateTime, persistentProgressMessage.Progress);
 
@@ -85,8 +86,6 @@ public class MessageDeletionModule : SocketInteractionModule
             Snowflake lastMessageID = default
         )
         {
-            var contextChannel = Context.Channel;
-
             if (lastMessageID == 0)
                 lastMessageID = Snowflake.LargeSnowflake;
 
@@ -94,7 +93,7 @@ public class MessageDeletionModule : SocketInteractionModule
             if (!valid)
                 return;
 
-            var persistentProgressMessage = new MessageDeletingProgressPersistentMessage(contextChannel);
+            var persistentProgressMessage = new MessageDeletingProgressPersistentMessage(Context.Interaction);
 
             // TODO: Abstract this logic away to another component
             var textChannels = Context.Guild.TextChannels;
@@ -135,7 +134,7 @@ public class MessageDeletionModule : SocketInteractionModule
         }
 
         [SlashCommand("range", "Deletes all received announcement messages that were deleted from the original source.")]
-        public async Task DeleteOtherChannelDeletedAnnouncementMessages
+        public async Task DeleteDeletedAnnouncementRange
         (
             [Summary(description: "The channel on which the the messages to delete are contained.")]
             ITextChannel textChannel = null,
@@ -159,7 +158,7 @@ public class MessageDeletionModule : SocketInteractionModule
             if (!valid)
                 return;
 
-            var persistentProgressMessage = new MessageDeletingProgressPersistentMessage(contextChannel);
+            var persistentProgressMessage = new MessageDeletingProgressPersistentMessage(Context.Interaction);
             var foundMessages = await DiscoverMessagesAsync(DiscoverFilteredMessagesAsync, persistentProgressMessage);
 
             await DeleteFoundMessages(foundMessages, persistentProgressMessage);
@@ -187,10 +186,7 @@ public class MessageDeletionModule : SocketInteractionModule
     private static async Task DeleteFoundMessagesDifferentChannels(IReadOnlyCollection<IMessage> foundMessages, MessageDeletingProgressPersistentMessage persistentProgressMessage)
     {
         if (foundMessages.Count is 0)
-        {
-            await persistentProgressMessage.ReportFinalizedProgress(5000);
             return;
-        }
         
         var messagesByChannel = foundMessages.GroupBy(message => message.Channel).ToDictionary(grouping => grouping.Key, grouping => grouping.ToArray());
         var deleteTasks = new List<Task>();
@@ -203,21 +199,16 @@ public class MessageDeletionModule : SocketInteractionModule
     private static async Task DeleteFoundMessages(IReadOnlyCollection<IMessage> foundMessages, MessageDeletingProgressPersistentMessage persistentProgressMessage)
     {
         if (foundMessages.Count is 0)
-        {
-            await persistentProgressMessage.ReportFinalizedProgress(5000);
             return;
-        }
 
         await persistentProgressMessage.UpdateActionProgress();
         
         var progressMessageTimestamp = persistentProgressMessage.CurrentMessage.Timestamp.UtcDateTime;
         
-        var progressUpdateTask = persistentProgressMessage.KeepUpdatingProgressMessage(750, true, 5000);
+        var progressUpdateTask = persistentProgressMessage.KeepUpdatingProgressMessage(750, true);
         var messageChannel = foundMessages.First().Channel;
         await messageChannel.DeleteFoundMessages(foundMessages, progressMessageTimestamp, persistentProgressMessage.Progress);
         
         await progressUpdateTask;
-
-        return;
     }
 }

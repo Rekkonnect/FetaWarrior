@@ -15,7 +15,7 @@ public abstract class SocketInteractionModule : InteractionModuleBase<SocketInte
     {
         if (textChannel is not IGuildChannel guildChannel || guildChannel.GuildId != Context.Guild.Id)
         {
-            await Context.Channel.SendMessageAsync("This server does not contain the provided channel.");
+            await Context.Interaction.RespondAsync("This server does not contain the provided channel.");
             return false;
         }
 
@@ -32,13 +32,13 @@ public abstract class SocketInteractionModule : InteractionModuleBase<SocketInte
     {
         if (lastMessageID == 0)
         {
-            await Context.Channel.SendMessageAsync("The last message ID cannot be 0.");
+            await Context.Interaction.RespondAsync("The last message ID cannot be 0.");
             return false;
         }
 
         if (firstMessageID > lastMessageID)
         {
-            await Context.Channel.SendMessageAsync("The first message ID cannot be greater than the last message ID.");
+            await Context.Interaction.RespondAsync("The first message ID cannot be greater than the last message ID.");
             return false;
         }
 

@@ -1,12 +1,11 @@
 ﻿using Discord;
-using Discord.Interactions;
 using Garyon.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using TypeEx = Garyon.Reflection.TypeExtensions;
 
-namespace FetaWarrior.DiscordFunctionality.Slash;
+namespace FetaWarrior.DiscordFunctionality.Interactions;
 
 // FOR VERY ADVANCED SLASH COMMANDS?
 // This is not necessary, is it?

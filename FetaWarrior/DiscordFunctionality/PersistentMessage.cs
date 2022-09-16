@@ -1,6 +1,5 @@
 ﻿using Discord;
 using Discord.Net;
-using Discord.Rest;
 using Discord.WebSocket;
 using System;
 using System.Net;
@@ -10,16 +9,20 @@ namespace FetaWarrior.DiscordFunctionality;
 
 public class PersistentMessage
 {
-    public RestUserMessage CurrentMessage { get; private set; }
+    public IUserMessage CurrentMessage { get; private set; }
 
     protected PersistentMessage() { }
-    public PersistentMessage(RestUserMessage currentMessage)
+    public PersistentMessage(IUserMessage currentMessage)
     {
         CurrentMessage = currentMessage;
     }
     public PersistentMessage(ISocketMessageChannel channel, string messageContent)
     {
         InitializeForChannel(channel, messageContent);
+    }
+    public PersistentMessage(IDiscordInteraction interaction)
+    {
+        CurrentMessage = interaction.GetOriginalResponseAsync().Result;
     }
 
     protected void InitializeForChannel(ISocketMessageChannel channel, string messageContent)
@@ -44,7 +47,7 @@ public class PersistentMessage
             }
             catch (HttpException e) when (e.HttpCode == HttpStatusCode.NotFound)
             {
-                CurrentMessage = await CurrentMessage.Channel.SendMessageAsync(CurrentMessage.Content) as RestUserMessage;
+                CurrentMessage = await CurrentMessage.Channel.SendMessageAsync(CurrentMessage.Content);
                 await ModifyAsync(modifier);
             }
             catch { }

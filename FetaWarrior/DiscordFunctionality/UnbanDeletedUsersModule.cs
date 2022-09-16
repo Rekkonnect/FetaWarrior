@@ -1,6 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
-using FetaWarrior.DiscordFunctionality.Slash.Attributes;
+using FetaWarrior.DiscordFunctionality.Interactions.Attributes;
 using FetaWarrior.Extensions;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,14 +19,13 @@ public class UnbanDeletedUsersModule : MassYeetUsersModuleBase
     {
         var guild = Context.Guild;
 
-        var originalProgressMessage = await Context.Channel.SendMessageAsync("Getting this server's ban list...");
-        var persistentProgressMessage = new PersistentMessage(originalProgressMessage);
+        await Context.Interaction.RespondAsync("Getting this server's ban list...");
 
         var bans = await guild.GetAllBansAsync();
 
-        await persistentProgressMessage.SetContentAsync("Detecting possibly deleted accounts whose bans to revoke...");
+        await Context.Interaction.UpdateResponseTextAsync("Detecting possibly deleted accounts whose bans to revoke...");
 
-        await MassYeetWithProgress(bans.Where(ban => ban.User.IsDeleted()).Select(b => b.User.Id).ToArray(), persistentProgressMessage);
+        await MassYeetWithProgress(bans.Where(ban => ban.User.IsDeleted()).Select(b => b.User.Id).ToArray());
     }
 
     protected override Task YeetUser(ulong userID, string reason)

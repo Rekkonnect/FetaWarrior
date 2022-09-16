@@ -4,7 +4,6 @@ using Discord.Rest;
 using Discord.WebSocket;
 using FetaWarrior.Extensions;
 using Garyon.Functions;
-using Microsoft.VisualBasic;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;

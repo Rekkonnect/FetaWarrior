@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Discord.Net;
+using FetaWarrior.DiscordFunctionality.Interactions.Attributes;
 using FetaWarrior.Extensions;
 using Garyon.DataStructures;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
 
+[RequireDMContext]
 [RequireOwner]
 public class OwnerModule : SocketInteractionModule
 {
@@ -27,7 +29,7 @@ public class OwnerModule : SocketInteractionModule
 
     private async Task GetGuildsAsync(bool includeOwners)
     {
-        var typingState = Context.Channel.EnterTypingState();
+        var deferral = Context.Interaction.DeferAsync();
 
         var guilds = BotClientManager.Instance.Client.Guilds
             .OrderBy(g => g.Id).ToArray();
@@ -47,9 +49,8 @@ public class OwnerModule : SocketInteractionModule
             builder.AppendLine();
         }
 
-        await Context.Channel.SendMessageAsync(builder.ToString());
-
-        typingState.Dispose();
+        await deferral;
+        await Context.Interaction.UpdateResponseTextAsync(builder.ToString());
     }
     #endregion
 
