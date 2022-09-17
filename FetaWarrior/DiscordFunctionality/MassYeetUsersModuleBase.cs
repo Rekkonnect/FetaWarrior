@@ -21,7 +21,7 @@ public abstract class MassYeetUsersModuleBase : SocketInteractionModule
         var guild = Context.Guild;
         var channel = guild.SystemChannel;
 
-        await Context.Interaction.RespondAsync($"Discovering users to {Lexemes.ActionName}... 0 users have been found so far.");
+        await RespondAsync($"Discovering users to {Lexemes.ActionName}... 0 users have been found so far.");
 
         var toYeet = (await channel.GetMessageRangeAsync(firstMessageID, lastMessageID, IsGuildMemberJoinSystemMessage, UpdateMessage)).Select(sm => sm.Author.Id).ToArray();
 
@@ -32,7 +32,7 @@ public abstract class MassYeetUsersModuleBase : SocketInteractionModule
 
         async Task UpdateMessage(int messages)
         {
-            await Context.Interaction.UpdateResponseTextAsync($"Discovering users to {Lexemes.ActionName}... {messages} users have been found so far.");
+            await UpdateResponseTextAsync($"Discovering users to {Lexemes.ActionName}... {messages} users have been found so far.");
         }
     }
     #endregion
@@ -62,23 +62,23 @@ public abstract class MassYeetUsersModuleBase : SocketInteractionModule
     {
         var restGuild = await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
 
-        await Context.Interaction.RespondAsync("Retrieving guild member list...");
+        await RespondAsync("Retrieving guild member list...");
 
         var users = await restGuild.GetUsersAsync().FlattenAsync();
 
-        await Context.Interaction.UpdateResponseTextAsync($"Discovering users to {Lexemes.ActionName}...");
+        await UpdateResponseTextAsync($"Discovering users to {Lexemes.ActionName}...");
 
         var firstUser = users.FirstOrDefault(u => u.Id == firstUserID);
         if (firstUser == null)
         {
-            await Context.Interaction.UpdateResponseTextAsync($"The first user ID {firstUserID} could not be found in this server.");
+            await UpdateResponseTextAsync($"The first user ID {firstUserID} could not be found in this server.");
             return;
         }
 
         var lastUser = users.FirstOrDefault(u => u.Id == lastUserID);
         if (lastUser == null)
         {
-            await Context.Interaction.UpdateResponseTextAsync($"The last user ID {lastUserID} could not be found in this server.");
+            await UpdateResponseTextAsync($"The last user ID {lastUserID} could not be found in this server.");
             return;
         }
 
@@ -94,11 +94,11 @@ public abstract class MassYeetUsersModuleBase : SocketInteractionModule
 
         lastUser ??= await GetLastJoinedUser();
 
-        await Context.Interaction.RespondAsync("Retrieving guild member list...");
+        await RespondAsync("Retrieving guild member list...");
 
         var users = await restGuild.GetUsersAsync().FlattenAsync();
 
-        await Context.Interaction.UpdateResponseTextAsync($"Discovering users to {Lexemes.ActionName}...");
+        await UpdateResponseTextAsync($"Discovering users to {Lexemes.ActionName}...");
 
         var toBan = users.Where(u => u.JoinedAt >= firstUser.JoinedAt && u.JoinedAt <= lastUser.JoinedAt).Select(u => u.Id).ToArray();
 
@@ -124,23 +124,23 @@ public abstract class MassYeetUsersModuleBase : SocketInteractionModule
     {
         var restGuild = await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
 
-        await Context.Interaction.RespondAsync("Retrieving guild member list...");
+        await RespondAsync("Retrieving guild member list...");
 
         var users = await restGuild.GetUsersAsync().FlattenAsync();
 
-        await Context.Interaction.UpdateResponseTextAsync($"Discovering users to {Lexemes.ActionName}...");
+        await UpdateResponseTextAsync($"Discovering users to {Lexemes.ActionName}...");
 
         var firstUser = users.FirstOrDefault(u => u.Id == firstUserID);
         if (firstUser == null)
         {
-            await Context.Interaction.UpdateResponseTextAsync($"The first user ID {firstUserID} could not be found in this server.");
+            await UpdateResponseTextAsync($"The first user ID {firstUserID} could not be found in this server.");
             return;
         }
 
         var lastUser = users.FirstOrDefault(u => u.Id == lastUserID);
         if (lastUser == null)
         {
-            await Context.Interaction.UpdateResponseTextAsync($"The last user ID {lastUserID} could not be found in this server.");
+            await UpdateResponseTextAsync($"The last user ID {lastUserID} could not be found in this server.");
             return;
         }
 
@@ -154,11 +154,11 @@ public abstract class MassYeetUsersModuleBase : SocketInteractionModule
     {
         var restGuild = await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
 
-        await Context.Interaction.RespondAsync("Retrieving guild member list...");
+        await RespondAsync("Retrieving guild member list...");
 
         var users = await restGuild.GetUsersAsync().FlattenAsync();
 
-        await Context.Interaction.UpdateResponseTextAsync($"Discovering users to {Lexemes.ActionName}...");
+        await UpdateResponseTextAsync($"Discovering users to {Lexemes.ActionName}...");
 
         var toBan = users.Where(u => u.GetAvatarUrl() is null && u.JoinedAt >= firstUser.JoinedAt && u.JoinedAt <= lastUser.JoinedAt).Select(u => u.Id).ToArray();
 
@@ -216,7 +216,7 @@ public abstract class MassYeetUsersModuleBase : SocketInteractionModule
                 if (forbiddenOperationCount > 0)
                     progressMessageContent += $"\n{forbiddenOperationCount} users could not be {Lexemes.ActionPastParticiple}.";
 
-                await Context.Interaction.UpdateResponseTextAsync(progressMessageContent);
+                await UpdateResponseTextAsync(progressMessageContent);
                 await Task.Delay(1000);
             }
 
@@ -224,7 +224,7 @@ public abstract class MassYeetUsersModuleBase : SocketInteractionModule
             if (forbiddenOperationCount > 0)
                 finalizedMessage += $"\n{forbiddenOperationCount} users could not be {Lexemes.ActionPastParticiple}.";
 
-            await Context.Interaction.UpdateResponseTextAsync(finalizedMessage);
+            await UpdateResponseTextAsync(finalizedMessage);
         }
     }
 

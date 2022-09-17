@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
+using FetaWarrior.Extensions;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
@@ -13,9 +14,10 @@ public abstract class SocketInteractionModule : InteractionModuleBase<SocketInte
 
     protected async Task<bool> ValidateChannel(IMessageChannel textChannel)
     {
+        // Theoretically, this should never fail now, unless I miss some other preconditions
         if (textChannel is not IGuildChannel guildChannel || guildChannel.GuildId != Context.Guild.Id)
         {
-            await Context.Interaction.RespondAsync("This server does not contain the provided channel.");
+            await RespondAsync("This server does not contain the provided channel.");
             return false;
         }
 
@@ -32,16 +34,21 @@ public abstract class SocketInteractionModule : InteractionModuleBase<SocketInte
     {
         if (lastMessageID == 0)
         {
-            await Context.Interaction.RespondAsync("The last message ID cannot be 0.");
+            await RespondAsync("The last message ID cannot be 0.");
             return false;
         }
 
         if (firstMessageID > lastMessageID)
         {
-            await Context.Interaction.RespondAsync("The first message ID cannot be greater than the last message ID.");
+            await RespondAsync("The first message ID cannot be greater than the last message ID.");
             return false;
         }
 
         return true;
+    }
+
+    protected async Task UpdateResponseTextAsync(string message)
+    {
+        await InteractionModuleBaseExtensions.UpdateResponseTextAsync(this, message);
     }
 }

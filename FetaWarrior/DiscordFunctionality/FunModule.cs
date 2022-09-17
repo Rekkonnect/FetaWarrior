@@ -10,7 +10,7 @@ public class FunModule : SocketInteractionModule
     [SlashCommand("hug", "Give a hug!")]
     public async Task HugAsync
     (
-        [Summary(description: "The user to hug.")]
+        [Summary(description: "The user to hug")]
         IUser user = null
     )
     {

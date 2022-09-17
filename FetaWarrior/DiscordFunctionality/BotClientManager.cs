@@ -5,6 +5,7 @@ using Discord.WebSocket;
 using FetaWarrior.Extensions;
 using Garyon.Functions;
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using static FetaWarrior.ConsoleLogging;
@@ -55,7 +56,12 @@ public class BotClientManager
             InteractionService = new InteractionService(RestClient);
             InteractionService.AddTypeConverters(entryAssembly);
 
-            await InteractionService.AddModulesAsync(entryAssembly, null);
+            var modules = await InteractionService.AddModulesAsync(entryAssembly, null);
+            var ownerModules = modules.Where(m => m.Preconditions.Any(precondition => precondition is RequireOwnerAttribute));
+            foreach (var ownerModule in ownerModules)
+            {
+                await InteractionService.RemoveModuleAsync(ownerModule);
+            }
 #if DEBUG
             // Yes I have a private server to test the bot on
             const ulong testGuildID = 794554235970125855;

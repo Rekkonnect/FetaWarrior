@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
 
-[Group("delete", "Deletes messages based on specified conditions.")]
+[Group("delete", "Delete messages based on specified conditions")]
 [RequireGuildContext]
 [RequireUserPermission(ChannelPermission.ManageMessages, Group = "User")]
 [RequireUserPermission(GuildPermission.ManageMessages, Group = "User")]
@@ -20,14 +20,14 @@ namespace FetaWarrior.DiscordFunctionality;
 [RequireBotPermission(GuildPermission.ManageMessages, Group = "Bot")]
 public class MessageDeletionModule : SocketInteractionModule
 {
-    [SlashCommand("range", "Deletes a range of messages in a channel.")]
+    [SlashCommand("range", "Delete a range of messages in a channel")]
     public async Task DeleteRange
     (
-        [Summary(description: "The channel whose messages to delete, defaulting to this channel.")]
+        [Summary(description: "The channel whose messages to delete, defaulting to this channel")]
         ITextChannel textChannel = null,
-        [Summary(description: "The ID of the first message that will be deleted, **inclusive**.")]
+        [Summary(description: "The ID of the first message that will be deleted, inclusive")]
         Snowflake firstMessageID = default,
-        [Summary(description: "The ID of the last message that will be deleted, **inclusive**.")]
+        [Summary(description: "The ID of the last message that will be deleted, inclusive")]
         Snowflake lastMessageID = default
     )
     {
@@ -46,8 +46,10 @@ public class MessageDeletionModule : SocketInteractionModule
             return;
 
         var progressMessageTimestamp = Context.Interaction.CreatedAt;        
-        await Context.Interaction.RespondAsync("Discovering the messages to delete.");
+        await RespondAsync("Discovering the messages to delete.");
         var persistentProgressMessage = new MessageDeletingProgressPersistentMessage(Context.Interaction);
+
+        lastMessageID = Math.Min(lastMessageID, persistentProgressMessage.CurrentMessage.Id - 1);
 
         var foundMessages = await DiscoverMessagesAsync(DiscoverFilteredMessagesAsync, persistentProgressMessage);
 
@@ -63,7 +65,7 @@ public class MessageDeletionModule : SocketInteractionModule
         await updateTask;
     }
 
-    [Group("removed-an", "Deletes all received announcement messages that were deleted from the original source.")]
+    [Group("removed-an", "Delete all received announcement messages that were deleted from the original source")]
     public class RemovedAnnouncements : SocketInteractionModule
     {
         //                              DD/MM/YYYY
@@ -77,12 +79,12 @@ public class MessageDeletionModule : SocketInteractionModule
         private const string daCommandRemark = $@"{daCommandRemarkStatement0} {daCommandRemarkStatement1} {daCommandRemarkStatement2}";
 
         // TODO: Build indexing (database moment)
-        [SlashCommand("all-channels", "Delete all received announcement messages that were deleted from the original source.")]
+        [SlashCommand("all-channels", "Delete all received announcement messages that were deleted from the original source")]
         public async Task DeleteServerWideDeletedAnnouncementMessages
         (
-            [Summary(description: "The ID of the first announcement message that will be deleted, **inclusive**.")]
+            [Summary(description: "The ID of the first announcement message that will be deleted, inclusive")]
             Snowflake firstMessageID = default,
-            [Summary(description: "The ID of the last announcement message that will be deleted, **inclusive**.")]
+            [Summary(description: "The ID of the last announcement message that will be deleted, inclusive")]
             Snowflake lastMessageID = default
         )
         {
@@ -133,14 +135,14 @@ public class MessageDeletionModule : SocketInteractionModule
             return message.Flags.GetValueOrDefault().HasFlag(MessageFlags.SourceMessageDeleted);
         }
 
-        [SlashCommand("range", "Deletes all received announcement messages that were deleted from the original source.")]
+        [SlashCommand("range", "Delete all received announcement messages that were deleted from the original source")]
         public async Task DeleteDeletedAnnouncementRange
         (
-            [Summary(description: "The channel on which the the messages to delete are contained.")]
+            [Summary(description: "The channel on which the the messages to delete are contained")]
             ITextChannel textChannel = null,
-            [Summary(description: "The ID of the first announcement message that will be deleted, **inclusive**.")]
+            [Summary(description: "The ID of the first announcement message that will be deleted, inclusive")]
             Snowflake firstMessageID = default,
-            [Summary(description: "The ID of the last announcement message that will be deleted, **inclusive**.")]
+            [Summary(description: "The ID of the last announcement message that will be deleted, inclusive")]
             Snowflake lastMessageID = default
         )
         {

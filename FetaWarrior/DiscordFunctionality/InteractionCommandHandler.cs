@@ -56,6 +56,7 @@ public class InteractionCommandHandler : BaseHandler
     {
         ConsoleLogging.WriteEventWithCurrentTime($"{interaction.User.ToNiceString()} sent an interaction:");
         PrintNiceInteractionMessage(interaction.Data);
+        Console.WriteLine();
     }
 
     private static void PrintNiceInteractionMessage(IApplicationCommandInteractionData data)

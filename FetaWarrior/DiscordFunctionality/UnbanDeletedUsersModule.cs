@@ -14,16 +14,16 @@ public class UnbanDeletedUsersModule : MassYeetUsersModuleBase
 {
     public override UserYeetingLexemes Lexemes => MassUnbanningLexemes.Instance;
 
-    [SlashCommand("unban-deleted", "Revokes the ban for all banned accounts that have been deleted as deleted.")]
+    [SlashCommand("unban-deleted", "Revoke the ban for all banned accounts that have been detected as deleted")]
     public async Task UnbanAllDeleted()
     {
         var guild = Context.Guild;
 
-        await Context.Interaction.RespondAsync("Getting this server's ban list...");
+        await RespondAsync("Getting this server's ban list...");
 
         var bans = await guild.GetAllBansAsync();
 
-        await Context.Interaction.UpdateResponseTextAsync("Detecting possibly deleted accounts whose bans to revoke...");
+        await UpdateResponseTextAsync("Detecting possibly deleted accounts whose bans to revoke...");
 
         await MassYeetWithProgress(bans.Where(ban => ban.User.IsDeleted()).Select(b => b.User.Id).ToArray());
     }

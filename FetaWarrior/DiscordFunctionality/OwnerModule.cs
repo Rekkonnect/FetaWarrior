@@ -50,7 +50,7 @@ public class OwnerModule : SocketInteractionModule
         }
 
         await deferral;
-        await Context.Interaction.UpdateResponseTextAsync(builder.ToString());
+        await UpdateResponseTextAsync(builder.ToString());
     }
     #endregion
 
