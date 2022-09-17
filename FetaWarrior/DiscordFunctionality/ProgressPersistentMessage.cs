@@ -98,8 +98,8 @@ public abstract class ProgressPersistentMessage : InitializablePersistentMessage
         {
             if (updated)
             {
-                await UpdateDiscoveryProgress();
                 updated = false;
+                await UpdateDiscoveryProgress();
             }
 
             if (complete.Value)
@@ -117,8 +117,8 @@ public abstract class ProgressPersistentMessage : InitializablePersistentMessage
         {
             if (updated)
             {
-                await DisplayActionProgress();
                 updated = false;
+                await DisplayActionProgress();
             }
 
             if (Progress.IsComplete)

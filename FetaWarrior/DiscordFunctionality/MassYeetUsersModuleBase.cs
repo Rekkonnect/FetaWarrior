@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Net;
 using FetaWarrior.Extensions;
+using FetaWarrior.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -22,18 +23,19 @@ public abstract class MassYeetUsersModuleBase : SocketInteractionModule
         var channel = guild.SystemChannel;
 
         await RespondAsync($"Discovering users to {Lexemes.ActionName}... 0 users have been found so far.");
+        var persistentMessage = new MassYeetingProgressPersistentMessage(this);
+        var discoveryCompleteBoxed = new BoxedStruct<bool>();
+        var updateTask = persistentMessage.KeepUpdatingDiscoveryMessage(750, discoveryCompleteBoxed);
 
-        var toYeet = (await channel.GetMessageRangeAsync(firstMessageID, lastMessageID, IsGuildMemberJoinSystemMessage, UpdateMessage)).Select(sm => sm.Author.Id).ToArray();
+        var messageRange = await channel.GetMessageRangeAsync(firstMessageID, lastMessageID, IsGuildMemberJoinSystemMessage, persistentMessage.Progress);
+        discoveryCompleteBoxed.Value = true;
+
+        var toYeet = messageRange.Select(sm => sm.Author.Id).ToArray();
 
         await MassYeetWithProgress(toYeet);
 
         // Functions
         static bool IsGuildMemberJoinSystemMessage(IMessage m) => m.Type == MessageType.GuildMemberJoin;
-
-        async Task UpdateMessage(int messages)
-        {
-            await UpdateResponseTextAsync($"Discovering users to {Lexemes.ActionName}... {messages} users have been found so far.");
-        }
     }
     #endregion
     #region Join Date

@@ -48,7 +48,7 @@ public class BotClientManager
         StartActivityLoop();
     }
 
-    private async Task RegisterSlashCommands()
+    private async Task RegisterSlashCommandsAsync()
     {
         try
         {
@@ -61,8 +61,9 @@ public class BotClientManager
             foreach (var ownerModule in ownerModules)
             {
                 await InteractionService.RemoveModuleAsync(ownerModule);
+                // Owner commands are nerfed; might be the end of an era? 
             }
-#if DEBUG
+#if DEBUG && false
             // Yes I have a private server to test the bot on
             const ulong testGuildID = 794554235970125855;
             await InteractionService.RegisterCommandsToGuildAsync(testGuildID);
@@ -104,7 +105,7 @@ public class BotClientManager
 
     private async Task OnSocketClientReady()
     {
-        await RegisterSlashCommands();
+        await RegisterSlashCommandsAsync();
     }
     private async Task OnSocketClientLoggedIn()
     {

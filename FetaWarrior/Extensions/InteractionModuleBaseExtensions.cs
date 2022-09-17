@@ -9,6 +9,6 @@ public static class InteractionModuleBaseExtensions
     public static async Task UpdateResponseTextAsync<TContext>(this InteractionModuleBase<TContext> module, string text)
         where TContext : class, IInteractionContext
     {
-        await module.UpdateResponseTextAsync(text);
+        await module.Context.Interaction.UpdateResponseTextAsync(text);
     }
 }

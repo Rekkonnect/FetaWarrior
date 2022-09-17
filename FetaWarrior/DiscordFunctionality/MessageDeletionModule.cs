@@ -55,7 +55,7 @@ public class MessageDeletionModule : SocketInteractionModule
 
         async Task<HashSet<IMessage>> DiscoverFilteredMessagesAsync()
         {
-            return await textChannel.GetMessageRangeAsync(firstMessageID, lastMessageID, value => persistentProgressMessage.Progress.Target = value);
+            return await textChannel.GetMessageRangeAsync(firstMessageID, lastMessageID, persistentProgressMessage.Progress);
         }
 
         var updateTask = persistentProgressMessage.KeepUpdatingProgressMessage(750, true);
@@ -100,21 +100,27 @@ public class MessageDeletionModule : SocketInteractionModule
             // TODO: Abstract this logic away to another component
             var textChannels = Context.Guild.TextChannels;
             var messageRetrievalTasks = new Task<HashSet<IMessage>>[textChannels.Count];
-            var retrievedMessageCounts = new int[textChannels.Count];
+            var channelProgresses = new Progress[textChannels.Count];
+            for (int i = 0; i < textChannels.Count; i++)
+                channelProgresses[i] = new();
 
             var completedBoxed = new BoxedStruct<bool>();
             var discoveryUpdate = persistentProgressMessage.KeepUpdatingDiscoveryMessage(750, completedBoxed);
 
             foreach (var (index, textChannel) in textChannels.WithIndex())
             {
+                var channelProgress = channelProgresses[index];
+
+                channelProgress.Updated += ChannelProgressUpdated;
+
                 var task = textChannel.GetMessageRangeAsync(firstMessageID, lastMessageID, earliestAnnouncementDate,
-                    IsSourceMessageDeleted, UpdateRetrievedMessageCounts);
+                    IsSourceMessageDeleted, channelProgress);
                 messageRetrievalTasks[index] = task;
 
-                void UpdateRetrievedMessageCounts(int value)
+                void ChannelProgressUpdated()
                 {
-                    retrievedMessageCounts[index] = value;
-                    persistentProgressMessage.Progress.Target = retrievedMessageCounts.Sum();
+                    // This could be a system but it's fine
+                    persistentProgressMessage.Progress.Target = channelProgresses.Sum(p => p.Target);
                 }
             }
 
@@ -128,6 +134,11 @@ public class MessageDeletionModule : SocketInteractionModule
             var foundMessages = messageRetrievalTasks.Select(t => t.Result).Flatten().ToList();
 
             await DeleteFoundMessagesDifferentChannels(foundMessages, persistentProgressMessage);
+        }
+
+        private void ChannelProgressUpdated()
+        {
+            throw new NotImplementedException();
         }
 
         private static bool IsSourceMessageDeleted(IMessage message)
@@ -160,6 +171,8 @@ public class MessageDeletionModule : SocketInteractionModule
             if (!valid)
                 return;
 
+            await RespondAsync("Discovering deleted announcement messages to remove.");
+
             var persistentProgressMessage = new MessageDeletingProgressPersistentMessage(Context.Interaction);
             var foundMessages = await DiscoverMessagesAsync(DiscoverFilteredMessagesAsync, persistentProgressMessage);
 
@@ -168,7 +181,7 @@ public class MessageDeletionModule : SocketInteractionModule
             async Task<HashSet<IMessage>> DiscoverFilteredMessagesAsync()
             {
                 return await textChannel.GetMessageRangeAsync(firstMessageID, lastMessageID, earliestAnnouncementDate,
-                                                              IsSourceMessageDeleted, null);
+                                                              IsSourceMessageDeleted, persistentProgressMessage.Progress);
             }
         }
     }
@@ -201,7 +214,10 @@ public class MessageDeletionModule : SocketInteractionModule
     private static async Task DeleteFoundMessages(IReadOnlyCollection<IMessage> foundMessages, MessageDeletingProgressPersistentMessage persistentProgressMessage)
     {
         if (foundMessages.Count is 0)
+        {
+            await persistentProgressMessage.SetContentAsync("No messages were found to delete.");
             return;
+        }
 
         await persistentProgressMessage.UpdateActionProgress();
         
