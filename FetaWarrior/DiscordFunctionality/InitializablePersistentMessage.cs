@@ -13,7 +13,14 @@ public abstract class InitializablePersistentMessage : PersistentMessage
         InitializeForChannel(channel, GetInitializationMessageContent());
     }
     protected InitializablePersistentMessage(IDiscordInteraction interaction)
-        : base(interaction) { }
+        : base(interaction)
+    {
+        // This might be risky (evaluate)
+        if (CurrentMessage is null)
+        {
+            interaction.RespondAsync(GetInitializationMessageContent()).Wait();
+        }
+    }
 
     protected abstract string GetInitializationMessageContent();
 }

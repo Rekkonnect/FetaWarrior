@@ -54,42 +54,6 @@ public abstract class MassYeetUsersModuleBase : SocketInteractionModule
         return lastJoinedUser;
     }
 
-    public async Task MassYeetFromJoinDate(ulong firstUserID)
-    {
-        var lastJoinedUser = await GetLastJoinedUser();
-
-        await MassYeetFromJoinDate(firstUserID, lastJoinedUser.Id);
-    }
-    public async Task MassYeetFromJoinDate(ulong firstUserID, ulong lastUserID)
-    {
-        var restGuild = await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
-
-        await RespondAsync("Retrieving guild member list...");
-
-        var users = await restGuild.GetUsersAsync().FlattenAsync();
-
-        await UpdateResponseTextAsync($"Discovering users to {Lexemes.ActionName}...");
-
-        var firstUser = users.FirstOrDefault(u => u.Id == firstUserID);
-        if (firstUser == null)
-        {
-            await UpdateResponseTextAsync($"The first user ID {firstUserID} could not be found in this server.");
-            return;
-        }
-
-        var lastUser = users.FirstOrDefault(u => u.Id == lastUserID);
-        if (lastUser == null)
-        {
-            await UpdateResponseTextAsync($"The last user ID {lastUserID} could not be found in this server.");
-            return;
-        }
-
-        var toBan = users.Where(u => u.JoinedAt >= firstUser.JoinedAt && u.JoinedAt <= lastUser.JoinedAt).Select(u => u.Id).ToArray();
-
-        await MassYeetWithProgress(toBan);
-    }
-
-    // Copy-pasted, but the above method is probably being yeeted anyway
     public async Task MassYeetFromJoinDate(IGuildUser firstUser, IGuildUser lastUser)
     {
         var restGuild = await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
@@ -108,50 +72,6 @@ public abstract class MassYeetUsersModuleBase : SocketInteractionModule
     }
     #endregion
     #region Default Avatar
-    public async Task MassYeetFromDefaultAvatar(ulong firstUserID)
-    {
-        var guild = Context.Guild;
-
-        // Ensure that all users are downloaded
-        await guild.DownloadUsersAsync();
-
-        var lastJoinedUser = guild.Users.First();
-        foreach (var user in guild.Users)
-            if (user.JoinedAt > lastJoinedUser.JoinedAt)
-                lastJoinedUser = user;
-
-        await MassYeetFromDefaultAvatar(firstUserID, lastJoinedUser.Id);
-    }
-    public async Task MassYeetFromDefaultAvatar(ulong firstUserID, ulong lastUserID)
-    {
-        var restGuild = await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
-
-        await RespondAsync("Retrieving guild member list...");
-
-        var users = await restGuild.GetUsersAsync().FlattenAsync();
-
-        await UpdateResponseTextAsync($"Discovering users to {Lexemes.ActionName}...");
-
-        var firstUser = users.FirstOrDefault(u => u.Id == firstUserID);
-        if (firstUser == null)
-        {
-            await UpdateResponseTextAsync($"The first user ID {firstUserID} could not be found in this server.");
-            return;
-        }
-
-        var lastUser = users.FirstOrDefault(u => u.Id == lastUserID);
-        if (lastUser == null)
-        {
-            await UpdateResponseTextAsync($"The last user ID {lastUserID} could not be found in this server.");
-            return;
-        }
-
-        var toBan = users.Where(u => u.GetAvatarUrl() is null && u.JoinedAt >= firstUser.JoinedAt && u.JoinedAt <= lastUser.JoinedAt).Select(u => u.Id).ToArray();
-
-        await MassYeetWithProgress(toBan);
-    }
-
-    // Same as the other
     public async Task MassYeetFromDefaultAvatar(IGuildUser firstUser, IGuildUser lastUser)
     {
         var restGuild = await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
