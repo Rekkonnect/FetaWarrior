@@ -1,17 +1,15 @@
 ﻿using Discord;
 using Garyon.DataStructures;
 using Garyon.Extensions;
+using System;
 using System.IO;
 using System.Linq;
 
 namespace FetaWarrior.Configuration;
 
-// TODO: Remove this once the slash command migration is over
-
-// Probably rename to BotPrefixesConfig
+[Obsolete("Bot prefixes are no longer being used")]
 public class BotPrefixesConfig
 {
-    // TODO: Use the database whenever it's setup
     private const string prefixesFilePath = "prefixes.txt";
     public const string DefaultPrefix = "=";
 

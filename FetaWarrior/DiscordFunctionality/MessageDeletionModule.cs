@@ -1,6 +1,5 @@
 ﻿using Discord;
 using Discord.Interactions;
-using FetaWarrior.DiscordFunctionality.Interactions.Attributes;
 using FetaWarrior.Extensions;
 using FetaWarrior.Utilities;
 using Garyon.Extensions;
@@ -13,7 +12,8 @@ using System.Threading.Tasks;
 namespace FetaWarrior.DiscordFunctionality;
 
 [Group("delete", "Delete messages based on specified conditions")]
-[RequireGuildContext]
+[EnabledInDm(false)]
+[RequireContext(ContextType.Guild)]
 [RequireUserPermission(ChannelPermission.ManageMessages, Group = "User")]
 [RequireUserPermission(GuildPermission.ManageMessages, Group = "User")]
 [RequireBotPermission(ChannelPermission.ManageMessages, Group = "Bot")]
@@ -95,6 +95,8 @@ public class MessageDeletionModule : SocketInteractionModule
             if (!valid)
                 return;
 
+            await RespondAsync("Retrieving information about the channels in this guild...");
+
             var persistentProgressMessage = new MessageDeletingProgressPersistentMessage(Context.Interaction);
 
             // TODO: Abstract this logic away to another component
@@ -134,11 +136,6 @@ public class MessageDeletionModule : SocketInteractionModule
             var foundMessages = messageRetrievalTasks.Select(t => t.Result).Flatten().ToList();
 
             await DeleteFoundMessagesDifferentChannels(foundMessages, persistentProgressMessage);
-        }
-
-        private void ChannelProgressUpdated()
-        {
-            throw new NotImplementedException();
         }
 
         private static bool IsSourceMessageDeleted(IMessage message)
@@ -201,7 +198,10 @@ public class MessageDeletionModule : SocketInteractionModule
     private static async Task DeleteFoundMessagesDifferentChannels(IReadOnlyCollection<IMessage> foundMessages, MessageDeletingProgressPersistentMessage persistentProgressMessage)
     {
         if (foundMessages.Count is 0)
+        {
+            await persistentProgressMessage.ReportFinalizedProgress();
             return;
+        }
         
         var messagesByChannel = foundMessages.GroupBy(message => message.Channel).ToDictionary(grouping => grouping.Key, grouping => grouping.ToArray());
         var deleteTasks = new List<Task>();

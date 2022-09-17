@@ -2,7 +2,7 @@
 using Discord.Commands;
 using System;
 
-namespace FetaWarrior.DiscordFunctionality;
+namespace FetaWarrior.DiscordFunctionality.OldModules;
 
 [Obsolete("This is going to be removed sooner or later")]
 public abstract class SocketModule : ModuleBase<SocketCommandContext>

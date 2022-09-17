@@ -8,7 +8,7 @@ public class FunModule : SocketInteractionModule
 {
     #region Hugs
     [SlashCommand("hug", "Give a hug!")]
-    public async Task HugAsync
+    public async Task Hug
     (
         [Summary(description: "The user to hug")]
         IUser user = null

@@ -1,12 +1,12 @@
 ﻿using Discord;
 using Discord.Interactions;
-using FetaWarrior.DiscordFunctionality.Interactions.Attributes;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
 
 [Group("masskick", "Mass kicks all users that suit a specified filter")]
-[RequireGuildContext]
+[EnabledInDm(false)]
+[RequireContext(ContextType.Guild)]
 [RequireUserPermission(GuildPermission.KickMembers)]
 [RequireBotPermission(GuildPermission.KickMembers)]
 public class MassKickModule : MassYeetUsersModuleBase

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FetaWarrior.DiscordFunctionality;
+namespace FetaWarrior.DiscordFunctionality.OldModules;
 
 [Obsolete("There should be no help. No help for the weak.")]
 public class HelpModule : SocketModule

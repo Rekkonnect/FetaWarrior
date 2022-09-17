@@ -2,6 +2,7 @@
 using Discord.Rest;
 using Discord.WebSocket;
 using FetaWarrior.Configuration;
+using FetaWarrior.DiscordFunctionality.OldModules;
 using FetaWarrior.Extensions;
 using Garyon.Extensions;
 using System;
@@ -12,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
 
+[Obsolete("Old commands are ditched")]
 public class CommandHandler : BaseHandler
 {
     public static CommandHandler GlobalInstance { get; private set; }

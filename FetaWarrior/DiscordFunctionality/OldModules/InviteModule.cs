@@ -2,7 +2,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace FetaWarrior.DiscordFunctionality;
+namespace FetaWarrior.DiscordFunctionality.OldModules;
 
 [Obsolete("This aged quite well")]
 public class InviteModule : SocketModule

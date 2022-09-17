@@ -4,7 +4,7 @@ using Discord.Rest;
 using Discord.WebSocket;
 using FetaWarrior.Extensions;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
@@ -19,6 +19,8 @@ public class InteractionCommandHandler : BaseHandler
 
     protected override string HandledObjectName => "interaction command";
 
+    private readonly HashSet<IDiscordInteraction> unhandledInteractions = new();
+
     private InteractionCommandHandler() { }
 
     #region Initialization
@@ -26,23 +28,38 @@ public class InteractionCommandHandler : BaseHandler
     {
         client.InteractionCreated += HandleInteraction;
     }
+
     #endregion
+
+    public void RegisterCommandExecution(SocketInteractionModule module)
+    {
+        unhandledInteractions.Remove(module.Context.Interaction);
+    }
 
     private async Task HandleInteraction(SocketInteraction interaction)
     {
-        var interactionTask = RunInteraction(interaction); 
+        var interactionTask = RunInteraction(interaction);
         LogHandledMessage(interaction);
         await interactionTask;
     }
 
-    private static async Task RunInteraction(SocketInteraction interaction)
+    private async Task RunInteraction(SocketInteraction interaction)
     {
         var context = new SocketInteractionContext(Client, interaction);
+        unhandledInteractions.Add(interaction);
         var result = await InteractionService.ExecuteCommandAsync(context, null);
+
+        // Delay for a bit to guarantee that the command execution event fires
+        await Task.Delay(2000);
+        if (unhandledInteractions.Contains(interaction))
+        {
+            result = PreconditionResult.FromError("You cannot execute this command because either you or the bot does not have the sufficient permissions.");
+            unhandledInteractions.Remove(interaction);
+        }
         await HandleResult(interaction, result);
     }
 
-    private void LogHandledMessage(IDiscordInteraction interaction)
+    private static void LogHandledMessage(IDiscordInteraction interaction)
     {
         switch (interaction)
         {
@@ -52,7 +69,7 @@ public class InteractionCommandHandler : BaseHandler
         }
     }
 
-    private void LogHandledMessage(ISlashCommandInteraction interaction)
+    private static void LogHandledMessage(ISlashCommandInteraction interaction)
     {
         ConsoleLogging.WriteEventWithCurrentTime($"{interaction.User.ToNiceString()} sent an interaction:");
         PrintNiceInteractionMessage(interaction.Data);
@@ -61,38 +78,12 @@ public class InteractionCommandHandler : BaseHandler
 
     private static void PrintNiceInteractionMessage(IApplicationCommandInteractionData data)
     {
-        var fullCommandName = GetFullCommandName(data, out var deepmostCommand);
+        var fullCommandName = data.GetFullCommandName(out var deepmostCommand);
         Console.WriteLine($"/{fullCommandName}");
         foreach (var option in deepmostCommand?.Options ?? data.Options)
         {
             Console.WriteLine($"  {option.Name}: {option.Value} ({option.Type})");
         }
-    }
-    // Now move those to extensions, what an API to deal with
-    // They were just this close to building a great abstracted API
-    private static string GetFullCommandName(IApplicationCommandInteractionData data, out IApplicationCommandInteractionDataOption nestedSubCommand)
-    {
-        var commandString = data.Name;
-        var options = data.Options;
-        nestedSubCommand = null;
-        while (true)
-        {
-            var next = options.FirstOrDefault();
-
-            bool isSubcommand = IsSubCommand(next?.Type);
-            if (!isSubcommand)
-                break;
-
-            commandString += $" {next.Name}";
-            options = next.Options;
-            nestedSubCommand = next;
-        }
-        return commandString;
-    }
-
-    private static bool IsSubCommand(ApplicationCommandOptionType? type)
-    {
-        return type is ApplicationCommandOptionType.SubCommandGroup or ApplicationCommandOptionType.SubCommand;
     }
 
     private static async Task HandleResult(IDiscordInteraction context, IResult result)
@@ -119,15 +110,14 @@ public class InteractionCommandHandler : BaseHandler
                 break;
 
             case InteractionCommandError.UnmetPrecondition:
-                await messageSender($"{result.ErrorReason}");
+                await messageSender("Failed to execute the command, either because this is not for you, or this is not the right place to do it.");
                 break;
 
             default:
                 await messageSender(error switch
                 {
-                    InteractionCommandError.ConvertFailed => $"Failed to convert the arguments to their correct form, make sure you provide a valid snowflake ID.",
-                    InteractionCommandError.ParseFailed => $"Failed to parse the command, is this supposed to be triggered?",
-                    InteractionCommandError.UnmetPrecondition => $"Failed to execute the command, either because this is not for you, or this is not the right place to do it.",
+                    InteractionCommandError.ConvertFailed => "Failed to convert the arguments to their correct form, make sure you provide a valid snowflake ID.",
+                    InteractionCommandError.ParseFailed => "Failed to parse the command, is this supposed to be triggered?",
 
                     InteractionCommandError.Exception or
                     InteractionCommandError.Unsuccessful => $"Developer is bad, error was caused by his fault.\nError information: {error} - {result.ErrorReason}",
@@ -135,11 +125,6 @@ public class InteractionCommandHandler : BaseHandler
                     _ => "Unknown issue occurred.",
                 });
                 break;
-        }
-
-        if (result is PreconditionResult preconditionResult)
-        {
-            //preconditionResult.
         }
 
         if (result is ExecuteResult executionResult)

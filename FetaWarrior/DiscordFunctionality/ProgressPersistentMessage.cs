@@ -91,7 +91,7 @@ public abstract class ProgressPersistentMessage : InitializablePersistentMessage
 
     public async Task KeepUpdatingDiscoveryMessage(int refreshDelay, BoxedStruct<bool> complete)
     {
-        bool updated = false;
+        bool updated = true;
         Progress.Updated += () => updated = true;
 
         while (!complete.Value)
@@ -110,7 +110,7 @@ public abstract class ProgressPersistentMessage : InitializablePersistentMessage
     }
     public async Task KeepUpdatingProgressMessage(int refreshDelay, bool reportFinalizedProgress, int deletionDelay = -1)
     {
-        bool updated = false;
+        bool updated = true;
         Progress.Updated += () => updated = true;
         
         while (!Progress.IsComplete)

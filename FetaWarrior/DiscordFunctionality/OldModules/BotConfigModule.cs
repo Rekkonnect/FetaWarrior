@@ -5,7 +5,7 @@ using FetaWarrior.Extensions;
 using System;
 using System.Threading.Tasks;
 
-namespace FetaWarrior.DiscordFunctionality;
+namespace FetaWarrior.DiscordFunctionality.OldModules;
 
 [Obsolete("The bot no longer supports messages with custom prefixes, as we're migrating to Discord slash commands")]
 public class BotConfigModule : SocketModule

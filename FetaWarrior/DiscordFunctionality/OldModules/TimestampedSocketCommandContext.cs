@@ -2,7 +2,7 @@
 using Discord.WebSocket;
 using System;
 
-namespace FetaWarrior.DiscordFunctionality;
+namespace FetaWarrior.DiscordFunctionality.OldModules;
 
 [Obsolete("This is probably never making it anyway")]
 public class TimestampedSocketCommandContext : SocketCommandContext

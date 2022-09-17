@@ -1,19 +1,20 @@
 ﻿using Discord;
 using Discord.Interactions;
-using FetaWarrior.DiscordFunctionality.Interactions.Attributes;
 using FetaWarrior.Extensions;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
 
-[RequireGuildContext]
+[EnabledInDm(false)]
+[RequireContext(ContextType.Guild)]
 [RequireUserPermission(GuildPermission.ManageGuild)]
 [RequireBotPermission(GuildPermission.ManageGuild)]
 public class UnbanDeletedUsersModule : MassYeetUsersModuleBase
 {
     public override UserYeetingLexemes Lexemes => MassUnbanningLexemes.Instance;
 
+    [EnabledInDm(false)]
     [SlashCommand("unban-deleted", "Revoke the ban for all banned accounts that have been detected as deleted")]
     public async Task UnbanAllDeleted()
     {

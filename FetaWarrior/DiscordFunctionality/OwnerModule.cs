@@ -1,7 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Discord.Net;
-using FetaWarrior.DiscordFunctionality.Interactions.Attributes;
 using FetaWarrior.Extensions;
 using Garyon.DataStructures;
 using System.Collections.Generic;
@@ -11,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
 
-[RequireDMContext]
+[EnabledInDm(false)]
 [RequireOwner]
 public class OwnerModule : SocketInteractionModule
 {

@@ -2,7 +2,7 @@
 
 namespace FetaWarrior.DiscordFunctionality;
 
-public abstract class InviteUtilities
+public static class InviteUtilities
 {
     public static string GenerateBotInviteLink(ulong clientID, ulong permissions)
     {

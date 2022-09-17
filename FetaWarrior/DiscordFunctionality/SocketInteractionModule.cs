@@ -12,6 +12,12 @@ public abstract class SocketInteractionModule : InteractionModuleBase<SocketInte
     public string AuthorNickname => GuildUser?.Nickname;
     public string AuthorNicknameOrUsername => AuthorNickname ?? AuthorUsername;
 
+    public override void BeforeExecute(ICommandInfo command)
+    {
+        InteractionCommandHandler.GlobalInstance.RegisterCommandExecution(this);
+        base.BeforeExecute(command);
+    }
+
     protected async Task<bool> ValidateChannel(IMessageChannel textChannel)
     {
         // Theoretically, this should never fail now, unless I miss some other preconditions

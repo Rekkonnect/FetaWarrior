@@ -3,7 +3,6 @@
 
 using Discord;
 using Discord.Interactions;
-using FetaWarrior.DiscordFunctionality.Interactions.Attributes;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
@@ -13,8 +12,9 @@ public class TestModule : SocketInteractionModule
 #if TEST
     [SlashCommand("test-admin", "A very private test that you should not be able to see")]
 #endif
-    [RequireGuildContext]
-    [RequireUserAdminPermission]
+    [EnabledInDm(false)]
+    [RequireContext(ContextType.Guild)]
+    [RequireUserPermission(GuildPermission.Administrator)]
     public async Task TestAdminAsync()
     {
         var permissions = Context.Guild.GetUser(Context.Interaction.User.Id).GuildPermissions;
