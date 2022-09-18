@@ -27,6 +27,7 @@ public class BotClientManager
                                            | GatewayIntents.Guilds
                                            | GatewayIntents.GuildMembers
                                            | GatewayIntents.GuildMessages
+                                           | GatewayIntents.GuildVoiceStates
                                            | GatewayIntents.GuildBans;
 
     public static BotClientManager Instance { get; }
