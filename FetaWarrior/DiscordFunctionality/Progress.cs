@@ -36,7 +36,7 @@ public class Progress
     }
 
     private void UpdateField(ref int field, int value)
-{
+    {
         int original = Interlocked.Exchange(ref field, value);
         if (original == value)
             return;

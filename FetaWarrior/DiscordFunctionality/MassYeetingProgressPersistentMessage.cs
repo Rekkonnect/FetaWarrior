@@ -1,6 +1,4 @@
-﻿using Discord.Rest;
-
-namespace FetaWarrior.DiscordFunctionality;
+﻿namespace FetaWarrior.DiscordFunctionality;
 
 public class MassYeetingProgressPersistentMessage : ProgressPersistentMessage
 {
@@ -8,8 +6,8 @@ public class MassYeetingProgressPersistentMessage : ProgressPersistentMessage
 
     public override IActionLexemes Lexemes => module.Lexemes;
 
-    public MassYeetingProgressPersistentMessage(MassYeetUsersModuleBase massYeetModule, RestUserMessage currentMessage)
-        : base(currentMessage)
+    public MassYeetingProgressPersistentMessage(MassYeetUsersModuleBase massYeetModule)
+        : base(massYeetModule.Context.Interaction)
     {
         module = massYeetModule;
     }

@@ -29,25 +29,19 @@ public static class IMessageChannelExtensions
     {
         return await GetMessageRangeAsync(channel, firstMessageID, lastMessageID, messagePredicate, null);
     }
-    public static async Task<HashSet<IMessage>> GetMessageRangeAsync(this IMessageChannel channel, ulong firstMessageID, ulong lastMessageID, Action<int> progressReporter)
+
+    public static async Task<HashSet<IMessage>> GetMessageRangeAsync(this IMessageChannel channel, ulong firstMessageID, ulong lastMessageID, Progress progress)
     {
-        return await GetMessageRangeAsync(channel, firstMessageID, lastMessageID, null, progressReporter);
+        return await GetMessageRangeAsync(channel, firstMessageID, lastMessageID, null, progress);
     }
-    public static async Task<HashSet<IMessage>> GetMessageRangeAsync(this IMessageChannel channel, ulong firstMessageID, ulong lastMessageID, Func<int, Task> progressReporter)
+    public static async Task<HashSet<IMessage>> GetMessageRangeAsync(this IMessageChannel channel, ulong firstMessageID, ulong lastMessageID, DateTime minTimestamp, Progress progress)
     {
-        return await GetMessageRangeAsync(channel, firstMessageID, lastMessageID, null, progressReporter);
+        return await GetMessageRangeAsync(channel, firstMessageID, lastMessageID, minTimestamp, null, progress);
     }
-    public static async Task<HashSet<IMessage>> GetMessageRangeAsync(this IMessageChannel channel, ulong firstMessageID, ulong lastMessageID, DateTime minTimestamp, Func<int, Task> progressReporter)
+
+    public static async Task<HashSet<IMessage>> GetMessageRangeAsync(this IMessageChannel channel, ulong firstMessageID, ulong lastMessageID, Predicate<IMessage> messagePredicate, Progress progress)
     {
-        return await GetMessageRangeAsync(channel, firstMessageID, lastMessageID, minTimestamp, null, progressReporter);
-    }
-    public static async Task<HashSet<IMessage>> GetMessageRangeAsync(this IMessageChannel channel, ulong firstMessageID, ulong lastMessageID, Predicate<IMessage> messagePredicate, Action<int> progressReporter)
-    {
-        return await GetMessageRangeAsync(channel, firstMessageID, lastMessageID, minValidDate, messagePredicate, progressReporter);
-    }
-    public static async Task<HashSet<IMessage>> GetMessageRangeAsync(this IMessageChannel channel, ulong firstMessageID, ulong lastMessageID, Predicate<IMessage> messagePredicate, Func<int, Task> progressReporter)
-    {
-        return await GetMessageRangeAsync(channel, firstMessageID, lastMessageID, minValidDate, messagePredicate, progressReporter);
+        return await GetMessageRangeAsync(channel, firstMessageID, lastMessageID, minValidDate, messagePredicate, progress);
     }
 
     public static async Task<HashSet<IMessage>> GetMessageRangeAsync(this IMessageChannel channel, ulong firstMessageID, ulong lastMessageID, DateTime minTimestamp, Predicate<IMessage> messagePredicate)
@@ -55,11 +49,7 @@ public static class IMessageChannelExtensions
         return await GetMessageRangeAsync(channel, firstMessageID, lastMessageID, minTimestamp, messagePredicate, null);
     }
     
-    public static async Task<HashSet<IMessage>> GetMessageRangeAsync(this IMessageChannel channel, ulong firstMessageID, ulong lastMessageID, DateTime minTimestamp, Predicate<IMessage> messagePredicate, Func<int, Task> progressReporter)
-    {
-        return await GetMessageRangeAsync(channel, firstMessageID, lastMessageID, minTimestamp, messagePredicate, progressReporter?.WrapSync());
-    }
-    public static async Task<HashSet<IMessage>> GetMessageRangeAsync(this IMessageChannel channel, ulong firstMessageID, ulong lastMessageID, DateTime minTimestamp, Predicate<IMessage> messagePredicate, Action<int> progressReporter)
+    public static async Task<HashSet<IMessage>> GetMessageRangeAsync(this IMessageChannel channel, ulong firstMessageID, ulong lastMessageID, DateTime minTimestamp, Predicate<IMessage> messagePredicate, Progress progress)
     {
         var result = new HashSet<IMessage>();
 
@@ -98,7 +88,8 @@ public static class IMessageChannelExtensions
             if (!foundNewMessages)
                 break;
 
-            progressReporter?.Invoke(result.Count);
+            if (progress != null)
+                progress.Target = result.Count;
 
             if (containsEarlierMessages)
                 break;

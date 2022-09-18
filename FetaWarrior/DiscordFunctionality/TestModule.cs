@@ -2,23 +2,24 @@
 //#define TEST
 
 using Discord;
-using FetaWarrior.DiscordFunctionality.Attributes;
+using Discord.Interactions;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
 
-public class TestModule : SocketModule
+public class TestModule : SocketInteractionModule
 {
 #if TEST
-    [Command("testadmin")]
+    [SlashCommand("test-admin", "A very private test that you should not be able to see")]
 #endif
-    [RequireGuildContext]
-    [RequireUserAdminPermission]
+    [EnabledInDm(false)]
+    [RequireContext(ContextType.Guild)]
+    [RequireUserPermission(GuildPermission.Administrator)]
     public async Task TestAdminAsync()
     {
-        var permissions = Context.Guild.GetUser(Context.Message.Author.Id).GuildPermissions;
+        var permissions = Context.Guild.GetUser(Context.Interaction.User.Id).GuildPermissions;
         bool isAdmin = permissions.Has(GuildPermission.Administrator);
-        await ReplyAsync(isAdmin switch
+        await RespondAsync(isAdmin switch
         {
             true => "The command was successfully called by an admin; nothing wrong here.",
             false => "The command was unfortunately called by a non-admin, despite the admin requirement in the command's definition.",

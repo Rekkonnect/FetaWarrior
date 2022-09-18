@@ -1,5 +1,6 @@
-﻿using Discord.Rest;
+﻿using Discord;
 using Discord.WebSocket;
+using FetaWarrior.Utilities;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
@@ -10,10 +11,12 @@ public abstract class ProgressPersistentMessage : InitializablePersistentMessage
 
     public abstract IActionLexemes Lexemes { get; }
 
-    protected ProgressPersistentMessage(RestUserMessage currentMessage)
+    protected ProgressPersistentMessage(IUserMessage currentMessage)
         : base(currentMessage) { }
     protected ProgressPersistentMessage(ISocketMessageChannel channel)
         : base(channel) { }
+    protected ProgressPersistentMessage(IDiscordInteraction interaction)
+        : base(interaction) { }
 
     protected override string GetInitializationMessageContent()
     {
@@ -88,15 +91,15 @@ public abstract class ProgressPersistentMessage : InitializablePersistentMessage
 
     public async Task KeepUpdatingDiscoveryMessage(int refreshDelay, BoxedStruct<bool> complete)
     {
-        bool updated = false;
+        bool updated = true;
         Progress.Updated += () => updated = true;
 
         while (!complete.Value)
         {
             if (updated)
             {
-                await UpdateDiscoveryProgress();
                 updated = false;
+                await UpdateDiscoveryProgress();
             }
 
             if (complete.Value)
@@ -107,15 +110,15 @@ public abstract class ProgressPersistentMessage : InitializablePersistentMessage
     }
     public async Task KeepUpdatingProgressMessage(int refreshDelay, bool reportFinalizedProgress, int deletionDelay = -1)
     {
-        bool updated = false;
+        bool updated = true;
         Progress.Updated += () => updated = true;
         
         while (!Progress.IsComplete)
         {
             if (updated)
             {
-                await DisplayActionProgress();
                 updated = false;
+                await DisplayActionProgress();
             }
 
             if (Progress.IsComplete)

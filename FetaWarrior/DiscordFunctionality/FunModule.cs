@@ -1,27 +1,27 @@
 ﻿using Discord;
-using Discord.Commands;
+using Discord.Interactions;
 using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
 
-public class FunModule : SocketModule
+public class FunModule : SocketInteractionModule
 {
     #region Hugs
-    [Command("hug")]
-    [Summary("Hugs you. This command was added because the developer would greatly appreciate some hugs.")]
-    public async Task HugAsync()
-    {
-        await Context.Channel.SendMessageAsync($"Huggie with **{AuthorNicknameOrUsername}** :heart:");
-    }
-    [Command("hug")]
-    [Summary("Hugs a specified user. This command was added because the developer would greatly appreciate some hugs.")]
-    public async Task HugAsync
+    [SlashCommand("hug", "Give a hug!")]
+    public async Task Hug
     (
-        [Summary("The user to hug.")]
-        IUser user
+        [Summary(description: "The user to hug")]
+        IUser user = null
     )
     {
-        await Context.Channel.SendMessageAsync($"{user.Mention}, **{AuthorNicknameOrUsername}** hugs you :heart:");
+        if (user is null)
+        {
+            await RespondAsync($"Huggie with **{AuthorNicknameOrUsername}** :heart:");
+        }
+        else
+        {
+            await RespondAsync($"{user.Mention}, **{AuthorNicknameOrUsername}** hugs you :heart:");
+        }
     }
     #endregion
 }

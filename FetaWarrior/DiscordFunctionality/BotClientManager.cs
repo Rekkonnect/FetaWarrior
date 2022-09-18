@@ -1,8 +1,12 @@
 ﻿using Discord;
+using Discord.Interactions;
 using Discord.Rest;
 using Discord.WebSocket;
-using FetaWarrior.Configuration;
+using FetaWarrior.Extensions;
+using Garyon.Functions;
 using System;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using static FetaWarrior.ConsoleLogging;
 
@@ -10,6 +14,7 @@ namespace FetaWarrior.DiscordFunctionality;
 
 public class BotClientManager
 {
+    // ManageGuild for unbanning deleted users
     public const GuildPermission MinimumBotPermissions = GuildPermission.KickMembers
                                                        | GuildPermission.BanMembers
                                                        | GuildPermission.ManageGuild
@@ -32,17 +37,55 @@ public class BotClientManager
     }
 
     public DiscordSocketClient Client { get; private set; }
-    public DiscordRestClient RestClient { get; private set; }
+    public DiscordRestClient RestClient => Client.Rest;
+    //public DiscordRestClient RestClient { get; private set; }
+
+    // Only store an interaction service for the socket client
+    public InteractionService InteractionService { get; private set; }
 
     private BotClientManager()
     {
         StartActivityLoop();
     }
 
+    private async Task RegisterSlashCommandsAsync()
+    {
+        try
+        {
+            // Yes I have a private server to test the bot on
+            const ulong testGuildID = 794554235970125855;
+
+            var entryAssembly = Assembly.GetEntryAssembly();
+            InteractionService = new InteractionService(RestClient);
+            InteractionService.AddTypeConverters(entryAssembly);
+
+            // Clean the command list from the private server
+            await InteractionService.RegisterCommandsToGuildAsync(testGuildID);
+
+            var modules = await InteractionService.AddModulesAsync(entryAssembly, null);
+            var ownerModules = modules.Where(m => m.Preconditions.Any(precondition => precondition is RequireOwnerAttribute));
+            foreach (var ownerModule in ownerModules)
+            {
+                await InteractionService.RemoveModuleAsync(ownerModule);
+                // Owner commands are nerfed; might be the end of an era? 
+            }
+
+#if DEBUG && false
+            await InteractionService.RegisterCommandsToGuildAsync(testGuildID);
+#else
+            await InteractionService.RegisterCommandsGloballyAsync();
+#endif
+        }
+        catch (Exception e)
+        {
+            ConsoleUtilities.WriteExceptionInfo(e);
+        }
+    }
+
     private void InitializeNewClients()
     {
         InitializeNewSocketClient();
-        InitializeNewRestClient();
+        //InitializeNewRestClient();
     }
     private void InitializeNewSocketClient()
     {
@@ -51,20 +94,30 @@ public class BotClientManager
         Client = new(new() { GatewayIntents = BotIntents });
 
         // Class coupling go brrr
-        CommandHandler.GlobalInstance.AddEvents(Client);
+        InteractionCommandHandler.GlobalInstance.AddEvents(Client);
         DMHandler.GlobalInstance.AddEvents(Client);
 
-        Client.LoggedIn += AddSocketClientDisconnectionLoggers;
+        Client.LoggedIn += OnSocketClientLoggedIn;
+        Client.Ready += OnSocketClientReady;
     }
     private void InitializeNewRestClient()
     {
         DisposeRestClient().Wait();
-        RestClient = new();
+        //RestClient = new();
 
         RestClient.LoggedIn += AddRestClientDisconnectionLoggers;
     }
 
-    private async Task AddSocketClientDisconnectionLoggers()
+    private async Task OnSocketClientReady()
+    {
+        await RegisterSlashCommandsAsync();
+    }
+    private async Task OnSocketClientLoggedIn()
+    {
+        AddSocketClientDisconnectionLoggers();
+    }
+
+    private void AddSocketClientDisconnectionLoggers()
     {
         Client.Disconnected += LogSocketClientDisconnection;
         Client.LoggedOut += LogSocketClientDisconnection;
@@ -116,17 +169,23 @@ public class BotClientManager
 
     public async Task InitializeLogin()
     {
-        Task.WaitAll(LoginSocketClient(), LoginRestClient());
+        await LoginSocketClient();
+        return;
+
+        await Task.WhenAll(LoginSocketClient(), LoginRestClient());
     }
     public async Task Logout()
     {
-        Task.WaitAll(UnsubscribeLogoutSocketClient(), UnsubscribeLogoutRestClient());
+        await UnsubscribeLogoutSocketClient();
+        return;
+
+        await Task.WhenAll(UnsubscribeLogoutSocketClient(), UnsubscribeLogoutRestClient());
     }
 
     private async Task LoginSocketClient()
     {
         InitializeNewSocketClient();
-        await Client.LoginAsync(TokenType.Bot, BotCredentials.Instance.BotToken);
+        await Client.LoginAsync(BotCredentials.Instance);
         await Client.StartAsync();
 
         WriteEventWithCurrentTime("Socket client logged in");
@@ -134,7 +193,7 @@ public class BotClientManager
     private async Task LoginRestClient()
     {
         InitializeNewRestClient();
-        await RestClient.LoginAsync(TokenType.Bot, BotCredentials.Instance.BotToken);
+        await RestClient.LoginAsync(BotCredentials.Instance);
 
         WriteEventWithCurrentTime("REST client logged in");
     }
@@ -159,7 +218,7 @@ public class BotClientManager
         WriteEventWithCurrentTime("REST client logged out");
     }
 
-    #region Disconnection Loggers
+#region Disconnection Loggers
     private async Task LogSocketClientDisconnection(Exception e)
     {
         WriteEventWithCurrentTime("Socket client disconnected");
@@ -173,14 +232,19 @@ public class BotClientManager
     {
         WriteEventWithCurrentTime("REST client disconnected");
     }
-    #endregion
+#endregion
 
     private void StartActivityLoop()
     {
         var lines = new string[]
         {
-            $"Default Prefix: \"{BotConfig.DefaultPrefix}\"",
-            $"Help Command: \"{BotConfig.DefaultPrefix}help\"",
+            // These are becoming obsolete
+            /*
+            $"Default Prefix: \"{BotPrefixesConfig.DefaultPrefix}\"",
+            $"Help Command: \"{BotPrefixesConfig.DefaultPrefix}help\"",
+            */
+
+            $"Now supporting slash commands!",
             $"Servers: {{ServerCount}}",
         };
 
@@ -192,7 +256,7 @@ public class BotClientManager
 
             while (true)
             {
-                if (Client?.ConnectionState == ConnectionState.Connected)
+                if (Client?.ConnectionState is ConnectionState.Connected)
                 {
                     var line = lines[index].Replace($"{{ServerCount}}", $"{Client.Guilds.Count}");
                     await Client.SetActivityAsync(new Game(line, ActivityType.Playing, details: line));

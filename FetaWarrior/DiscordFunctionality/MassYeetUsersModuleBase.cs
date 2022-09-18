@@ -1,6 +1,8 @@
 ﻿using Discord;
 using Discord.Net;
+using Discord.Rest;
 using FetaWarrior.Extensions;
+using FetaWarrior.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -8,138 +10,99 @@ using System.Threading.Tasks;
 
 namespace FetaWarrior.DiscordFunctionality;
 
-public abstract class MassYeetUsersModuleBase : SocketModule
+public abstract class MassYeetUsersModuleBase : SocketInteractionModule
 {
     public abstract UserYeetingLexemes Lexemes { get; }
 
     #region Server Messages
-    protected async Task MassYeetFromServerMessages(ulong firstMessageID)
+    protected async Task MassYeetFromServerMessages(Snowflake firstMessageID, Snowflake lastMessageID, bool defaultAvatarOnly)
     {
-        var lastMessageID = (await Context.Channel.GetLastMessageAsync()).Id;
-        await MassYeetFromServerMessages(firstMessageID, lastMessageID);
-    }
-    protected async Task MassYeetFromServerMessages(ulong firstMessageID, ulong lastMessageID)
-    {
+        if (lastMessageID.Value is 0)
+            lastMessageID = Snowflake.LargeSnowflake;
+
         var guild = Context.Guild;
         var channel = guild.SystemChannel;
 
-        var originalProgressMessage = await Context.Channel.SendMessageAsync($"Discovering users to {Lexemes.ActionName}... 0 users have been found so far.");
-        var persistentProgressMessage = new PersistentMessage(originalProgressMessage);
+        await RespondAsync($"Discovering users to {Lexemes.ActionName}... 0 users have been found so far.");
+        var persistentMessage = new MassYeetingProgressPersistentMessage(this);
+        var discoveryCompleteBoxed = new BoxedStruct<bool>();
+        var updateTask = persistentMessage.KeepUpdatingDiscoveryMessage(750, discoveryCompleteBoxed);
 
-        var toYeet = (await channel.GetMessageRangeAsync(firstMessageID, lastMessageID, IsGuildMemberJoinSystemMessage, UpdateMessage)).Select(sm => sm.Author.Id).ToArray();
+        var messageRange = await channel.GetMessageRangeAsync(firstMessageID, lastMessageID, IsGuildMemberJoinSystemMessage, persistentMessage.Progress);
+        discoveryCompleteBoxed.Value = true;
 
-        await MassYeetWithProgress(toYeet, persistentProgressMessage);
+        var toYeet = messageRange
+            .Select(sm => sm.Author)
+            .Where(ShouldYeet)
+            .ToArray();
+
+        await MassYeetWithProgress(toYeet);
 
         // Functions
-        static bool IsGuildMemberJoinSystemMessage(IMessage m) => m.Type == MessageType.GuildMemberJoin;
-
-        async Task UpdateMessage(int messages)
+        static bool IsGuildMemberJoinSystemMessage(IMessage m)
         {
-            await persistentProgressMessage.SetContentAsync($"Discovering users to {Lexemes.ActionName}... {messages} users have been found so far.");
+            return m.Type is MessageType.GuildMemberJoin;
+        }
+
+        bool ShouldYeet(IUser user)
+        {
+            return ShouldYeetDefaultAvatarFilter(user, defaultAvatarOnly);
         }
     }
     #endregion
     #region Join Date
-    public async Task MassYeetFromJoinDate(ulong firstUserID)
+    private static IGuildUser LastJoinedUser(IEnumerable<IGuildUser> users)
     {
-        var guild = Context.Guild;
-
-        // Ensure that all users are downloaded
-        await guild.DownloadUsersAsync();
-
-        var lastJoinedUser = guild.Users.First();
-        foreach (var user in guild.Users)
-            if (user.JoinedAt > lastJoinedUser.JoinedAt)
-                lastJoinedUser = user;
-
-        await MassYeetFromJoinDate(firstUserID, lastJoinedUser.Id);
+        return users.MaxBy(user => user.JoinedAt);
     }
-    public async Task MassYeetFromJoinDate(ulong firstUserID, ulong lastUserID)
-    {
-        var restGuild = await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
 
-        var originalProgressMessage = await Context.Channel.SendMessageAsync("Retrieving guild member list...");
-        var persistentProgressMessage = new PersistentMessage(originalProgressMessage);
+    private async Task<RestGuild> GetRestGuildAsync()
+    {
+        return await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
+    }
+
+    public async Task MassYeetFromJoinDate(IGuildUser firstUser, IGuildUser lastUser, bool defaultAvatarOnly)
+    {
+        var restGuild = await GetRestGuildAsync();
+
+        await RespondAsync("Retrieving guild member list...");
 
         var users = await restGuild.GetUsersAsync().FlattenAsync();
+        lastUser ??= LastJoinedUser(users);
 
-        await persistentProgressMessage.SetContentAsync($"Discovering users to {Lexemes.ActionName}...");
+        await UpdateResponseTextAsync($"Discovering users to {Lexemes.ActionName}...");
 
-        var firstUser = users.FirstOrDefault(u => u.Id == firstUserID);
-        if (firstUser == null)
+        var toYeet = users.Where(JoinedBetween).ToArray();
+
+        await MassYeetWithProgress(toYeet);
+
+        bool JoinedBetween(IGuildUser user)
         {
-            await persistentProgressMessage.SetContentAsync($"The first user ID {firstUserID} could not be found in this server.");
-            return;
+            if (!ShouldYeetDefaultAvatarFilter(user, defaultAvatarOnly))
+                return false;
+
+            return user.JoinedAt >= firstUser.JoinedAt && user.JoinedAt <= lastUser.JoinedAt;
         }
-
-        var lastUser = users.FirstOrDefault(u => u.Id == lastUserID);
-        if (lastUser == null)
-        {
-            await persistentProgressMessage.SetContentAsync($"The last user ID {lastUserID} could not be found in this server.");
-            return;
-        }
-
-        var toBan = users.Where(u => u.JoinedAt >= firstUser.JoinedAt && u.JoinedAt <= lastUser.JoinedAt).Select(u => u.Id).ToArray();
-
-        await MassYeetWithProgress(toBan, persistentProgressMessage);
     }
-    #endregion
-    #region Default Avatar
-    public async Task MassYeetFromDefaultAvatar(ulong firstUserID)
+
+    private static bool ShouldYeetDefaultAvatarFilter(IUser user, bool defaultAvatarOnly)
     {
-        var guild = Context.Guild;
-
-        // Ensure that all users are downloaded
-        await guild.DownloadUsersAsync();
-
-        var lastJoinedUser = guild.Users.First();
-        foreach (var user in guild.Users)
-            if (user.JoinedAt > lastJoinedUser.JoinedAt)
-                lastJoinedUser = user;
-
-        await MassYeetFromDefaultAvatar(firstUserID, lastJoinedUser.Id);
-    }
-    public async Task MassYeetFromDefaultAvatar(ulong firstUserID, ulong lastUserID)
-    {
-        var restGuild = await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
-
-        var originalProgressMessage = await Context.Channel.SendMessageAsync("Retrieving guild member list...");
-        var persistentProgressMessage = new PersistentMessage(originalProgressMessage);
-
-        var users = await restGuild.GetUsersAsync().FlattenAsync();
-
-        await persistentProgressMessage.SetContentAsync($"Discovering users to {Lexemes.ActionName}...");
-
-        var firstUser = users.FirstOrDefault(u => u.Id == firstUserID);
-        if (firstUser == null)
-        {
-            await persistentProgressMessage.SetContentAsync($"The first user ID {firstUserID} could not be found in this server.");
-            return;
-        }
-
-        var lastUser = users.FirstOrDefault(u => u.Id == lastUserID);
-        if (lastUser == null)
-        {
-            await persistentProgressMessage.SetContentAsync($"The last user ID {lastUserID} could not be found in this server.");
-            return;
-        }
-
-        var toBan = users.Where(u => u.GetAvatarUrl() is null && u.JoinedAt >= firstUser.JoinedAt && u.JoinedAt <= lastUser.JoinedAt).Select(u => u.Id).ToArray();
-
-        await MassYeetWithProgress(toBan, persistentProgressMessage);
+        return !defaultAvatarOnly
+            || user.AvatarId is null;
     }
     #endregion
 
-    protected abstract Task YeetUser(ulong userID, string reason);
+    protected abstract Task YeetUser(IUser user, string reason);
 
-    protected async Task MassYeetWithProgress(ICollection<ulong> toYeet, PersistentMessage persistentProgressMessage)
+    // TODO: Use Progress
+    protected async Task MassYeetWithProgress(ICollection<IUser> toYeet)
     {
         int yeetedUserCount = 0;
         int forbiddenOperationCount = 0;
         bool yeetingComplete = false;
         var progressUpdatingTask = UpdateYeetingProgress();
 
-        foreach (ulong userID in toYeet)
+        foreach (var user in toYeet)
         {
             bool success = false;
             while (!success)
@@ -147,7 +110,7 @@ public abstract class MassYeetUsersModuleBase : SocketModule
                 success = true;
                 try
                 {
-                    await YeetUser(userID, $"Mass {Lexemes.ActionPastParticiple}");
+                    await YeetUser(user, $"Mass {Lexemes.ActionPastParticiple}");
                 }
                 catch (HttpException e) when (e.HttpCode == HttpStatusCode.Forbidden)
                 {
@@ -162,7 +125,12 @@ public abstract class MassYeetUsersModuleBase : SocketModule
             yeetedUserCount++;
         }
 
+        // THIS SUGGESTION IS A FALSE POSITIVE; This matters for breaking the async loop
+        // Though in a fairer note, this might be a general suggestion to avoid this practice
+#pragma warning disable IDE0059
         yeetingComplete = true;
+#pragma warning restore IDE0059
+
         await progressUpdatingTask;
 
         async Task UpdateYeetingProgress()
@@ -173,15 +141,15 @@ public abstract class MassYeetUsersModuleBase : SocketModule
                 if (forbiddenOperationCount > 0)
                     progressMessageContent += $"\n{forbiddenOperationCount} users could not be {Lexemes.ActionPastParticiple}.";
 
-                await persistentProgressMessage.SetContentAsync(progressMessageContent);
-                await Task.Delay(1000);
+                await UpdateResponseTextAsync(progressMessageContent);
+                await Task.Delay(750);
             }
 
             var finalizedMessage = $"{toYeet.Count - forbiddenOperationCount} users have been {Lexemes.ActionPastParticiple}.";
             if (forbiddenOperationCount > 0)
                 finalizedMessage += $"\n{forbiddenOperationCount} users could not be {Lexemes.ActionPastParticiple}.";
 
-            await persistentProgressMessage.SetContentAsync(finalizedMessage);
+            await UpdateResponseTextAsync(finalizedMessage);
         }
     }
 

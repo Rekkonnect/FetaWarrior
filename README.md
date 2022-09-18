@@ -1,6 +1,6 @@
 # Feta Warrior
 
-This bot started as a quick solution for mass banning the thousands of accounts that raided a server that I'm an admin in. It was then considered to be released for the public since no other bot was found to provide that kind of functionality.
+This bot started as a quick solution for mass banning the thousands of accounts that raided a server that I was an admin in. It was then considered to be released for the public since no other bot was found to provide that kind of functionality.
 
 # [Invite Link](https://discord.com/api/oauth2/authorize?client_id=786220671331074109&permissions=76806&scope=bot)
 
@@ -25,6 +25,7 @@ Permissions required:
 
 - **Mass kick/ban members based on system messages**
 - **Mass kick/ban members based on join dates**
+- **Mass kick/ban members with default avatars**
 - **Delete messages in a specified channel within a specified range**
 - **Delete all messages sent in a specified channel**
 - **Remove bans for deleted users**
@@ -33,11 +34,15 @@ Permissions required:
 ## Planned Functionality
 
 - Mass delete messages by user
+- [Remove all reactions from banned users](https://github.com/Rekkonnect/FetaWarrior/issues/2)
+- [Message and user commands for conveniently selecting a message/user range](https://github.com/Rekkonnect/FetaWarrior/issues/4)
+- [Move all channels in a category to another](https://github.com/Rekkonnect/FetaWarrior/issues/6)
+- [Move all users from a voice channel to another](https://github.com/Rekkonnect/FetaWarrior/issues/7)
 
 # Libraries Used
 
 - [Discord.NET](https://github.com/discord-net/Discord.Net)
-- [Garyon](https://github.com/AlFasGD/Garyon)
+- [Garyon](https://github.com/Rekkonsider/Garyon)
 
 # Contribution
 
@@ -51,5 +56,3 @@ Contributions are welcome, under the following constraints:
 ¯\\\_(ツ)\_/¯
 
 Ideally, you will want to test your code so that it does not cause issues. The official instance of the bot, including its secrets, are intentionally left unpublished, for obvious reasons.
-
-Note: a testing framework is currently under development, that will be hopefully merged into Discord.Net itself.

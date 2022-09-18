@@ -8,7 +8,7 @@ public static class DiscordTextExtensions
     {
         var result = input;
         foreach (var f in formatters)
-            result = result.Replace($@"{f}", $@"\{f}");
+            result = result.Replace($"{f}", $@"\{f}");
         return result;
     }
 }

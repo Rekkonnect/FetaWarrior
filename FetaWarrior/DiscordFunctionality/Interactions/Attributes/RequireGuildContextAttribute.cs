@@ -1,7 +1,7 @@
-﻿using Discord.Commands;
+﻿using Discord.Interactions;
 using System;
 
-namespace FetaWarrior.DiscordFunctionality.Attributes;
+namespace FetaWarrior.DiscordFunctionality.Interactions.Attributes;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
 public class RequireGuildContextAttribute : RequireContextAttribute
