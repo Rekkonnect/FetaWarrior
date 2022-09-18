@@ -61,7 +61,7 @@ public abstract class MassYeetUsersModuleBase : SocketInteractionModule
         return await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
     }
 
-    public async Task MassYeetFromJoinDate(IGuildUser firstUser, IGuildUser lastUser, bool defaultAvatarOnly)
+    protected async Task MassYeetFromJoinDate(IGuildUser firstUser, IGuildUser lastUser, bool defaultAvatarOnly)
     {
         var restGuild = await GetRestGuildAsync();
 

@@ -61,6 +61,7 @@ public class BotClientManager
 
             // Clean the command list from the private server
             await InteractionService.RegisterCommandsToGuildAsync(testGuildID);
+            WriteEventWithCurrentTime("Cleaned the leftover commands.");
 
             var modules = await InteractionService.AddModulesAsync(entryAssembly, null);
             var ownerModules = modules.Where(m => m.Preconditions.Any(precondition => precondition is RequireOwnerAttribute));
@@ -72,8 +73,10 @@ public class BotClientManager
 
 #if DEBUG && false
             await InteractionService.RegisterCommandsToGuildAsync(testGuildID);
+            WriteEventWithCurrentTime("Registered the commands in the test server.");
 #else
             await InteractionService.RegisterCommandsGloballyAsync();
+            WriteEventWithCurrentTime("Began registering the commands globally.");
 #endif
         }
         catch (Exception e)
