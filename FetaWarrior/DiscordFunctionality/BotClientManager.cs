@@ -52,9 +52,15 @@ public class BotClientManager
     {
         try
         {
+            // Yes I have a private server to test the bot on
+            const ulong testGuildID = 794554235970125855;
+
             var entryAssembly = Assembly.GetEntryAssembly();
             InteractionService = new InteractionService(RestClient);
             InteractionService.AddTypeConverters(entryAssembly);
+
+            // Clean the command list from the private server
+            await InteractionService.RegisterCommandsToGuildAsync(testGuildID);
 
             var modules = await InteractionService.AddModulesAsync(entryAssembly, null);
             var ownerModules = modules.Where(m => m.Preconditions.Any(precondition => precondition is RequireOwnerAttribute));
@@ -63,9 +69,8 @@ public class BotClientManager
                 await InteractionService.RemoveModuleAsync(ownerModule);
                 // Owner commands are nerfed; might be the end of an era? 
             }
+
 #if DEBUG && false
-            // Yes I have a private server to test the bot on
-            const ulong testGuildID = 794554235970125855;
             await InteractionService.RegisterCommandsToGuildAsync(testGuildID);
 #else
             await InteractionService.RegisterCommandsGloballyAsync();

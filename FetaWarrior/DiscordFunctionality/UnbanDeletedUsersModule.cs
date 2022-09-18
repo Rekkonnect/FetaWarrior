@@ -26,12 +26,12 @@ public class UnbanDeletedUsersModule : MassYeetUsersModuleBase
 
         await UpdateResponseTextAsync("Detecting possibly deleted accounts whose bans to revoke...");
 
-        await MassYeetWithProgress(bans.Where(ban => ban.User.IsDeleted()).Select(b => b.User.Id).ToArray());
+        await MassYeetWithProgress(bans.Where(ban => ban.User.IsDeleted()).Select(ban => ban.User).ToArray());
     }
 
-    protected override Task YeetUser(ulong userID, string reason)
+    protected override Task YeetUser(IUser user, string reason)
     {
-        return Context.Guild.RemoveBanAsync(userID, new() { AuditLogReason = reason });
+        return Context.Guild.RemoveBanAsync(user, new() { AuditLogReason = reason });
     }
 
     private sealed class MassUnbanningLexemes : UserYeetingLexemes

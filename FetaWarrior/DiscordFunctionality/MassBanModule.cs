@@ -13,34 +13,34 @@ public class MassBanModule : MassYeetUsersModuleBase
 {
     public override UserYeetingLexemes Lexemes => MassBanningLexemes.Instance;
 
-    #region Server Messages
     [SlashCommand("server-message", "Mass ban all users that are greeted with server messages within a range")]
     public async Task MassBanFromServerMessages
     (
         [Summary(description: "The ID of the first server message, inclusive")]
         Snowflake firstMessageID,
         [Summary(description: "The ID of the last server message, inclusive")]
-        Snowflake lastMessageID = default
+        Snowflake lastMessageID = default,
+        [Summary(description: "Enable this to only ban users with a default avatar")]
+        bool defaultAvatarOnly = false
     )
     {
-        await MassYeetFromServerMessages(firstMessageID, lastMessageID);
+        await MassYeetFromServerMessages(firstMessageID, lastMessageID, defaultAvatarOnly);
     }
-    #endregion
-    #region Join Date
     [SlashCommand("join-date", "Mass ban all users that joined within the range of two users' join dates")]
     public async Task MassBanFromJoinDate
     (
         [Summary(description: "The user whose join date is the starting point, inclusive")]
         IGuildUser firstUser,
         [Summary(description: "The user whose join date is the ending point, inclusive (omitting implies up until now)")]
-        IGuildUser lastUser = null
+        IGuildUser lastUser = null,
+        [Summary(description: "Enable this to only ban users with a default avatar")]
+        bool defaultAvatarOnly = false
     )
     {
-        await MassYeetFromJoinDate(firstUser, lastUser);
+        await MassYeetFromJoinDate(firstUser, lastUser, defaultAvatarOnly);
     }
-    #endregion
 
-    protected override async Task YeetUser(ulong userID, string reason) => await Context.Guild.AddBanAsync(userID, 7, reason);
+    protected override async Task YeetUser(IUser user, string reason) => await Context.Guild.AddBanAsync(user, 7, reason);
 
     private sealed class MassBanningLexemes : UserYeetingLexemes
     {

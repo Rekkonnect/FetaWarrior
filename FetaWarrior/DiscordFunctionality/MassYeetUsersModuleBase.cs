@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Net;
+using Discord.Rest;
 using FetaWarrior.Extensions;
 using FetaWarrior.Utilities;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ public abstract class MassYeetUsersModuleBase : SocketInteractionModule
     public abstract UserYeetingLexemes Lexemes { get; }
 
     #region Server Messages
-    protected async Task MassYeetFromServerMessages(Snowflake firstMessageID, Snowflake lastMessageID)
+    protected async Task MassYeetFromServerMessages(Snowflake firstMessageID, Snowflake lastMessageID, bool defaultAvatarOnly)
     {
         if (lastMessageID.Value is 0)
             lastMessageID = Snowflake.LargeSnowflake;
@@ -30,76 +31,78 @@ public abstract class MassYeetUsersModuleBase : SocketInteractionModule
         var messageRange = await channel.GetMessageRangeAsync(firstMessageID, lastMessageID, IsGuildMemberJoinSystemMessage, persistentMessage.Progress);
         discoveryCompleteBoxed.Value = true;
 
-        var toYeet = messageRange.Select(sm => sm.Author.Id).ToArray();
+        var toYeet = messageRange
+            .Select(sm => sm.Author)
+            .Where(ShouldYeet)
+            .ToArray();
 
         await MassYeetWithProgress(toYeet);
 
         // Functions
-        static bool IsGuildMemberJoinSystemMessage(IMessage m) => m.Type == MessageType.GuildMemberJoin;
+        static bool IsGuildMemberJoinSystemMessage(IMessage m)
+        {
+            return m.Type is MessageType.GuildMemberJoin;
+        }
+
+        bool ShouldYeet(IUser user)
+        {
+            return ShouldYeetDefaultAvatarFilter(user, defaultAvatarOnly);
+        }
     }
     #endregion
     #region Join Date
-    private async Task<IGuildUser> GetLastJoinedUser()
+    private static IGuildUser LastJoinedUser(IEnumerable<IGuildUser> users)
     {
-        var guild = Context.Guild;
-
-        // Ensure that all users are downloaded
-        await guild.DownloadUsersAsync();
-
-        var lastJoinedUser = guild.Users.First();
-        foreach (var user in guild.Users)
-            if (user.JoinedAt > lastJoinedUser.JoinedAt)
-                lastJoinedUser = user;
-
-        return lastJoinedUser;
+        return users.MaxBy(user => user.JoinedAt);
     }
 
-    public async Task MassYeetFromJoinDate(IGuildUser firstUser, IGuildUser lastUser)
+    private async Task<RestGuild> GetRestGuildAsync()
     {
-        var restGuild = await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
+        return await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
+    }
 
-        lastUser ??= await GetLastJoinedUser();
+    public async Task MassYeetFromJoinDate(IGuildUser firstUser, IGuildUser lastUser, bool defaultAvatarOnly)
+    {
+        var restGuild = await GetRestGuildAsync();
 
         await RespondAsync("Retrieving guild member list...");
 
         var users = await restGuild.GetUsersAsync().FlattenAsync();
+        lastUser ??= LastJoinedUser(users);
 
         await UpdateResponseTextAsync($"Discovering users to {Lexemes.ActionName}...");
 
-        var toBan = users.Where(u => u.JoinedAt >= firstUser.JoinedAt && u.JoinedAt <= lastUser.JoinedAt).Select(u => u.Id).ToArray();
+        var toYeet = users.Where(JoinedBetween).ToArray();
 
-        await MassYeetWithProgress(toBan);
+        await MassYeetWithProgress(toYeet);
+
+        bool JoinedBetween(IGuildUser user)
+        {
+            if (!ShouldYeetDefaultAvatarFilter(user, defaultAvatarOnly))
+                return false;
+
+            return user.JoinedAt >= firstUser.JoinedAt && user.JoinedAt <= lastUser.JoinedAt;
+        }
     }
-    #endregion
-    #region Default Avatar
-    public async Task MassYeetFromDefaultAvatar(IGuildUser firstUser, IGuildUser lastUser)
+
+    private static bool ShouldYeetDefaultAvatarFilter(IUser user, bool defaultAvatarOnly)
     {
-        var restGuild = await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
-
-        await RespondAsync("Retrieving guild member list...");
-
-        var users = await restGuild.GetUsersAsync().FlattenAsync();
-
-        await UpdateResponseTextAsync($"Discovering users to {Lexemes.ActionName}...");
-
-        var toBan = users.Where(u => u.GetAvatarUrl() is null && u.JoinedAt >= firstUser.JoinedAt && u.JoinedAt <= lastUser.JoinedAt).Select(u => u.Id).ToArray();
-
-        await MassYeetWithProgress(toBan);
+        return !defaultAvatarOnly
+            || user.AvatarId is null;
     }
     #endregion
 
-    // TODO: Change `ulong userID` to `IGuildUser user`
-    protected abstract Task YeetUser(ulong userID, string reason);
+    protected abstract Task YeetUser(IUser user, string reason);
 
-    // TODO: Change to accept ICollection<IGuildUser>
-    protected async Task MassYeetWithProgress(ICollection<ulong> toYeet)
+    // TODO: Use Progress
+    protected async Task MassYeetWithProgress(ICollection<IUser> toYeet)
     {
         int yeetedUserCount = 0;
         int forbiddenOperationCount = 0;
         bool yeetingComplete = false;
         var progressUpdatingTask = UpdateYeetingProgress();
 
-        foreach (ulong userID in toYeet)
+        foreach (var user in toYeet)
         {
             bool success = false;
             while (!success)
@@ -107,7 +110,7 @@ public abstract class MassYeetUsersModuleBase : SocketInteractionModule
                 success = true;
                 try
                 {
-                    await YeetUser(userID, $"Mass {Lexemes.ActionPastParticiple}");
+                    await YeetUser(user, $"Mass {Lexemes.ActionPastParticiple}");
                 }
                 catch (HttpException e) when (e.HttpCode == HttpStatusCode.Forbidden)
                 {
@@ -139,7 +142,7 @@ public abstract class MassYeetUsersModuleBase : SocketInteractionModule
                     progressMessageContent += $"\n{forbiddenOperationCount} users could not be {Lexemes.ActionPastParticiple}.";
 
                 await UpdateResponseTextAsync(progressMessageContent);
-                await Task.Delay(1000);
+                await Task.Delay(750);
             }
 
             var finalizedMessage = $"{toYeet.Count - forbiddenOperationCount} users have been {Lexemes.ActionPastParticiple}.";

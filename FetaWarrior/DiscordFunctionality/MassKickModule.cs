@@ -13,38 +13,39 @@ public class MassKickModule : MassYeetUsersModuleBase
 {
     public override UserYeetingLexemes Lexemes => UserKickingLexemes.Instance;
 
-    #region Server Messages
     [SlashCommand("server-message", "Mass kick all users that are greeted with server messages within a range")]
     public async Task MassKickFromServerMessages
     (
         [Summary(description: "The ID of the first server message, inclusive")]
         Snowflake firstMessageID,
         [Summary(description: "The ID of the last server message, inclusive")]
-        Snowflake lastMessageID = default
+        Snowflake lastMessageID = default,
+        [Summary(description: "Enable this to only kick users with a default avatar")]
+        bool defaultAvatarOnly = false
     )
     {
-        await MassYeetFromServerMessages(firstMessageID, lastMessageID);
+        await MassYeetFromServerMessages(firstMessageID, lastMessageID, defaultAvatarOnly);
     }
-    #endregion
-    #region Join Date
     [SlashCommand("join-date", "Mass kick all users that joined within the range of two users' join dates")]
     public async Task MassKickFromJoinDate
     (
         [Summary(description: "The user whose join date is the starting point, inclusive")]
         IGuildUser firstUser,
         [Summary(description: "The user whose join date is the ending point, inclusive (omitting implies up until now)")]
-        IGuildUser lastUser = null
+        IGuildUser lastUser = null,
+        [Summary(description: "Enable this to only kick users with a default avatar")]
+        bool defaultAvatarOnly = false
     )
     {
-        await MassYeetFromJoinDate(firstUser, lastUser);
+        await MassYeetFromJoinDate(firstUser, lastUser, defaultAvatarOnly);
     }
-    #endregion
 
-    protected override async Task YeetUser(ulong userID, string reason)
+    protected override async Task YeetUser(IUser user, string reason)
     {
-        var guild = await BotClientManager.Instance.RestClient.GetGuildAsync(Context.Guild.Id);
-        var user = await guild.GetUserAsync(userID);
-        await user.KickAsync(reason);
+        if (user is not IGuildUser guildUser)
+            return;
+
+        await guildUser.KickAsync(reason);
     }
 
     private sealed class UserKickingLexemes : UserYeetingLexemes
