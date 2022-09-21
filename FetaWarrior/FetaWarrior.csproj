@@ -6,7 +6,7 @@
     <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Discord.Net" Version="3.7.2" />
+    <PackageReference Include="Discord.Net" Version="3.8.1" />
     <PackageReference Include="Garyon" Version="0.2.7" />
   </ItemGroup>
   <ItemGroup>
