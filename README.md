@@ -16,10 +16,7 @@ Permissions required:
 # Usage
 ## General Information
 
-- All commands have a default prefix of `=`.
-- `=help`: Shows all the available commands, or commands that match the given query.
-- `=ping`: Gets an estimation of the current latency. It uses Discord.NET's Client.Latency property, which is not updated too frequently. Multiple consecutive commands might yield the same result due to that.
-- `=prefix`: Gets, sets or resets the prefix for the server. (Use `=help prefix` for more details).
+The bot fully operates using slash commands, old prefixes are no longer being used and handled. Just type `/` and you'll start seeing the available commands at the time of writing your command.
 
 ## Functionality
 
