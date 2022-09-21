@@ -115,6 +115,8 @@ public abstract class ProgressPersistentMessage : InitializablePersistentMessage
         
         while (!Progress.IsComplete)
         {
+            var delayTask = Task.Delay(refreshDelay);
+
             if (updated)
             {
                 updated = false;
@@ -124,7 +126,7 @@ public abstract class ProgressPersistentMessage : InitializablePersistentMessage
             if (Progress.IsComplete)
                 break;
 
-            await Task.Delay(refreshDelay);
+            await delayTask;
         }
 
         if (reportFinalizedProgress)

@@ -18,7 +18,7 @@ namespace FetaWarrior.DiscordFunctionality;
 public class ClearInviteModule : SocketInteractionModule
 {
     [EnabledInDm(false)]
-    [SlashCommand("server", "Clears invites for this server based on specified criteria")]
+    [SlashCommand("server", "Clear invites for this server based on specified criteria")]
     public async Task ClearInvitesEntireGuild
     (
         [Summary(description: "Only clear invites that have never been used (defaults to true)")]
@@ -35,7 +35,7 @@ public class ClearInviteModule : SocketInteractionModule
     }
 
     [EnabledInDm(false)]
-    [SlashCommand("channel", "Clears invites that target a specific channel based on specified criteria")]
+    [SlashCommand("channel", "Clear invites that target a specific channel based on specified criteria")]
     public async Task ClearInvitesChannel
     (
         [Summary(description: "The channel that the invites target")]
@@ -54,7 +54,7 @@ public class ClearInviteModule : SocketInteractionModule
     }
 
     [EnabledInDm(false)]
-    [SlashCommand("category", "Clears invites that target any channel inside a specific category based on specified criteria")]
+    [SlashCommand("category", "Clear invites that target any channel inside a specific category based on specified criteria")]
     public async Task ClearInvitesCategory
     (
         [Summary(description: "The category channel whose channels the invites target")]
@@ -102,6 +102,12 @@ public class ClearInviteModule : SocketInteractionModule
             invites = invites.Where(invite => channels.Any(c => c.Id == invite.ChannelId));
 
         var inviteList = invites.ToList();
+
+        if (inviteList.Count is 0)
+        {
+            await UpdateResponseTextAsync("There were no invites with the specified criteria.");
+            return;
+        }
 
         var persistentMessage = new InviteDeletionProgressPersistentMessage(Context.Interaction);
         persistentMessage.Progress.Target = inviteList.Count;
