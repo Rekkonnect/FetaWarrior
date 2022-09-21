@@ -30,14 +30,15 @@ Permissions required:
 - **Delete all messages sent in a specified channel**
 - **Remove bans for deleted users**
 - **Delete all announcement crosspost messages where the original announcement message was deleted**
+- **Move all channels in a category to another**
+- **Handle users in voice channels (move, disconnect, mute, etc.)**
+- **Clear invites based on specified criteria**
   
 ## Planned Functionality
 
 - Mass delete messages by user
 - [Remove all reactions from banned users](https://github.com/Rekkonnect/FetaWarrior/issues/2)
 - [Message and user commands for conveniently selecting a message/user range](https://github.com/Rekkonnect/FetaWarrior/issues/4)
-- [Move all channels in a category to another](https://github.com/Rekkonnect/FetaWarrior/issues/6)
-- [Move all users from a voice channel to another](https://github.com/Rekkonnect/FetaWarrior/issues/7)
 
 # Libraries Used
 
