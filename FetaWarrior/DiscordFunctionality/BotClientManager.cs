@@ -37,6 +37,8 @@ public class BotClientManager
         Instance = new();
     }
 
+    public bool HasPublicizedComamnds { get; private set; }
+
     public DiscordSocketClient Client { get; private set; }
     public DiscordRestClient RestClient => Client.Rest;
     //public DiscordRestClient RestClient { get; private set; }
@@ -51,6 +53,9 @@ public class BotClientManager
 
     private async Task RegisterSlashCommandsAsync()
     {
+        if (HasPublicizedComamnds)
+            return;
+
         try
         {
             // Yes I have a private server to test the bot on
@@ -79,6 +84,8 @@ public class BotClientManager
             await InteractionService.RegisterCommandsGloballyAsync();
             WriteEventWithCurrentTime("Began registering the commands globally.");
 #endif
+
+            HasPublicizedComamnds = true;
         }
         catch (Exception e)
         {
