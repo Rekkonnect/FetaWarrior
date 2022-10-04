@@ -38,6 +38,10 @@ public class InteractionCommandHandler : BaseHandler
 
     private async Task HandleInteraction(SocketInteraction interaction)
     {
+        // Do not handle message components; they should be independently handled elsewhere
+        if (interaction.Type is InteractionType.MessageComponent)
+            return;
+
         var interactionTask = RunInteraction(interaction);
         LogHandledMessage(interaction);
         await interactionTask;

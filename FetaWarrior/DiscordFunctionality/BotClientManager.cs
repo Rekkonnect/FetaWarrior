@@ -229,7 +229,7 @@ public class BotClientManager
         WriteEventWithCurrentTime("REST client logged out");
     }
 
-#region Disconnection Loggers
+    #region Disconnection Loggers
     private async Task LogSocketClientDisconnection(Exception e)
     {
         WriteEventWithCurrentTime("Socket client disconnected");
@@ -243,7 +243,7 @@ public class BotClientManager
     {
         WriteEventWithCurrentTime("REST client disconnected");
     }
-#endregion
+    #endregion
 
     private void StartActivityLoop()
     {
