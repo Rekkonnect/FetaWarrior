@@ -3,10 +3,22 @@ using System.Collections.Generic;
 
 namespace FetaWarrior.DiscordFunctionality;
 
-public record struct ChannelTypeFilterArguments(bool Text, bool Voice, bool Announcement, bool Stage, bool Forum)
+public struct ChannelTypeFilterArguments
 {
+    public static ChannelTypeFilterArguments ForAll => new() { All = true };
+
+    public bool All { get; set; }
+    public bool Text { get; set; }
+    public bool Voice { get; set; }
+    public bool Announcement { get; set; }
+    public bool Stage { get; set; }
+    public bool Forum { get; set; }
+
     public bool PassesFilter(IGuildChannel channel)
     {
+        if (All)
+            return true;
+
         return channel.GetChannelType() switch
         {
             ChannelType.Text => Text,

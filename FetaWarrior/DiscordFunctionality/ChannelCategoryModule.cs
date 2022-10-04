@@ -84,11 +84,28 @@ public class ChannelCategoryModule : SocketInteractionModule
         [Summary(description: "The channel category whose channels to delete (leave empty for uncategorized channels)")]
         ICategoryChannel parentCategory = null,
 
+        [Summary(description: "Set this to true to delete all channels inside the category without filtering by their type")]
+        bool deleteAll = false,
         [Summary(description: "Set this to true to delete the original category (if any) after deleting all the channels")]
         bool deleteCategory = false
     )
     {
-        var filters = await ShowChannelFilterMenu();
+        string finalMessage = "Successfully deleted the uncategorized channels";
+        if (parentCategory is not null)
+        {
+            finalMessage = $"Successfully deleted the channels in the **{parentCategory.Name}** category";
+        }
+
+        var filters = ChannelTypeFilterArguments.ForAll;
+        if (deleteAll)
+        {
+            await RespondAsync("Deleting all channels in the category...");
+        }
+        else
+        {
+            finalMessage += " of the specified type";
+            filters = await ShowChannelFilterMenu();
+        }
 
         var targetChannels = Context.Guild.ChannelsInCategory(parentCategory?.Id);
         var filteredChannels = Filter(targetChannels, filters).ToArray();
@@ -100,12 +117,14 @@ public class ChannelCategoryModule : SocketInteractionModule
 
         if (deleteCategory && parentCategory is not null)
         {
-            await UpdateResponseTextAsync("Deleting the category channel...");
+            await UpdateResponseTextAsync($"{finalMessage}. Deleting the category channel...");
 
             await parentCategory.DeleteAsync();
+
+            finalMessage += " including the category channel";
         }
 
-        await UpdateResponseTextAsync("Successfully deleted the channels of the specified types.");
+        await UpdateResponseTextAsync($"{finalMessage}.");
     }
 
     private static IEnumerable<IGuildChannel> Filter(IEnumerable<IGuildChannel> channels, ChannelTypeFilterArguments arguments)
