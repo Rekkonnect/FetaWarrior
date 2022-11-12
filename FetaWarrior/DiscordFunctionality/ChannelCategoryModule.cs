@@ -107,6 +107,9 @@ public class ChannelCategoryModule : SocketInteractionModule
             filters = await ShowChannelFilterMenu();
         }
 
+        bool includingSourceChannel = (Context.Channel as ITextChannel)?.CategoryId == parentCategory?.Id;
+        bool deletingSourceChannel = includingSourceChannel && (deleteAll || filters.Text);
+
         var targetChannels = Context.Guild.ChannelsInCategory(parentCategory?.Id);
         var filteredChannels = Filter(targetChannels, filters).ToArray();
 
@@ -117,14 +120,20 @@ public class ChannelCategoryModule : SocketInteractionModule
 
         if (deleteCategory && parentCategory is not null)
         {
-            await UpdateResponseTextAsync($"{finalMessage}. Deleting the category channel...");
+            if (!deletingSourceChannel)
+            {
+                await UpdateResponseTextAsync($"{finalMessage}. Deleting the category channel...");
+            }
 
             await parentCategory.DeleteAsync();
 
             finalMessage += " including the category channel";
         }
 
-        await UpdateResponseTextAsync($"{finalMessage}.");
+        if (!deletingSourceChannel)
+        {
+            await UpdateResponseTextAsync($"{finalMessage}.");
+        }
     }
 
     private static IEnumerable<IGuildChannel> Filter(IEnumerable<IGuildChannel> channels, ChannelTypeFilterArguments arguments)
